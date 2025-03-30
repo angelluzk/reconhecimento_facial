@@ -9,7 +9,7 @@
     -Instale e marque a opção "Add CMake to system PATH".
 🔹 Baixar Visual Studio Build Tools em: https://visualstudio.microsoft.com/visual-cpp-build-tools/
     -Durante a instalação, selecione "Desenvolvimento para C++ Desktop".
-(Recomendo reiniciar o computador, após a instalação, para evitar erros na instalação do dlib e dependências)
+(Recomendo reiniciar o computador, após a instalação, para evitar erros na instalação do dlib e dependências.)
 
 3️⃣ Instalação do dlib e dependências:
 🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos:
