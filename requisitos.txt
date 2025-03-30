@@ -3,7 +3,7 @@
 🔹 Baixe e instale pelo site oficial: https://www.python.org/downloads/
     -Marque a opção "Add Python to PATH" na instalação!
 
-2️⃣ Instalação do CMake e Visual Studio Build Tools: "Essa parte é exclusiva para Windows".
+2️⃣ Instalação do CMake e Visual Studio Build Tools:
 (OBS: O dlib precisa de um compilador C++ no Windows.)
 🔹 Baixar CMake em: https://cmake.org/download/
     -Instale e marque a opção "Add CMake to system PATH".
@@ -12,10 +12,10 @@
 (Recomendo reiniciar o computador, após a instalação, para evitar erros na instalação do dlib e dependências.)
 
 3️⃣ Instalação do dlib e dependências:
-🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos:
+🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos abaixo:
     
     pip install dlib
--Atualizar o pip para evitar erros:
+🔹Atualizar o pip para evitar erros:
     python -m pip install --upgrade pip
 
     pip install face_recognition
@@ -23,3 +23,6 @@
     pip install numpy
 
     pip install opencv-python
+
+🔹Certifique-se de atualizar o dlib e o face_recognition
+    pip install --upgrade face_recognition dlib
