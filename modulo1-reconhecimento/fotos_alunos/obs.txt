@@ -1,0 +1,2 @@
+-Acrescentar imagens aqui para comparação.
+-É importante que o nome da imagem seja o mesmo nome registrado no banco de dados. Deve está exatamente igual para que o registro no banco de dados seja colocado corretamente, caso não corresponda, ou seja, o nome da imagem esteja diferente do nome registrado no banco de dados, a detecção será "Desconhecida".

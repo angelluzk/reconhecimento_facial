@@ -1,8 +1,0 @@
-Para que o código funcione corretamente, é necessario adicionar nesta pasta as imagens correspondentes escritas no código.
-
-Necessita de:
-    aluno1.jpg
-    aluno2.jpg
-    desconhecido.jpg
-
-"Sem as imagens o código dará erro. Apenas para teste, podendo adaptar ao contexto do projeto."

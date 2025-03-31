@@ -1,28 +1,46 @@
-1️⃣ Instalação do Python:
-🔹 Certifique-se de instalar o Python na versão 3.7 ou superior.
+1️⃣ Instalação do Python
+🔹 Certifique-se de instalar o Python 3.7 ou superior.
 🔹 Baixe e instale pelo site oficial: https://www.python.org/downloads/
-    -Marque a opção "Add Python to PATH" na instalação!
+    -IMPORTANTE: Marque a opção "Add Python to PATH" na instalação!
 
-2️⃣ Instalação do CMake e Visual Studio Build Tools:
-(OBS: O dlib precisa de um compilador C++ no Windows.)
-🔹 Baixar CMake em: https://cmake.org/download/
-    -Instale e marque a opção "Add CMake to system PATH".
-🔹 Baixar Visual Studio Build Tools em: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-    -Durante a instalação, selecione "Desenvolvimento para C++ Desktop".
-(Recomendo reiniciar o computador, após a instalação, para evitar erros na instalação do dlib e dependências.)
+2️⃣ Instalação do CMake e Visual Studio Build Tools (Necessário para compilar o dlib)
+🔹 CMake: Baixe e instale em https://cmake.org/download/
+    -Durante a instalação, marque a opção "Add CMake to system PATH".
+🔹 Visual Studio Build Tools: Baixe e instale em https://visualstudio.microsoft.com/visual-cpp-build-tools/
+    -Durante a instalação, selecione: "Desenvolvimento para C++ Desktop"
+(Recomenda-se reiniciar o computador após essa etapa para evitar erros na instalação do dlib.)
 
-3️⃣ Instalação do dlib e dependências:
-🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos abaixo:
+3️⃣ Atualizar o pip (Evita problemas com pacotes desatualizados)
+🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguinte comando:
     
-    pip install dlib
-🔹Atualizar o pip para evitar erros:
     python -m pip install --upgrade pip
+
+4️⃣ Instalação das dependências principais
+🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos abaixo:
+🔹 Instalar dlib (biblioteca para reconhecimento facial)
+
+    pip install dlib
+
+🔹 Instalar face_recognition (baseado no dlib)
 
     pip install face_recognition
 
-    pip install numpy
+🔹 Instalar pacotes matemáticos e de processamento de imagem
 
+    pip install numpy
     pip install opencv-python
 
-🔹Certifique-se de atualizar o dlib e o face_recognition
+🔹 Certifique-se de que dlib e face_recognition estão atualizados
+
     pip install --upgrade face_recognition dlib
+
+5️⃣ Instalação do MySQL e Variáveis de Ambiente
+🔹 Conectar ao MySQL (diferentes bibliotecas para compatibilidade)
+
+    pip install pymysql
+    pip install mysqlclient
+    pip install mysql-connector-python
+
+🔹 Carregar variáveis de ambiente do .env
+
+    pip install python-dotenv
