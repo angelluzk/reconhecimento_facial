@@ -1,46 +1,58 @@
 1️⃣ Instalação do Python
 🔹 Certifique-se de instalar o Python 3.7 ou superior.
 🔹 Baixe e instale pelo site oficial: https://www.python.org/downloads/
-    -IMPORTANTE: Marque a opção "Add Python to PATH" na instalação!
+    - IMPORTANTE: Marque a opção "Add Python to PATH" na instalação!
 
 2️⃣ Instalação do CMake e Visual Studio Build Tools (Necessário para compilar o dlib)
 🔹 CMake: Baixe e instale em https://cmake.org/download/
-    -Durante a instalação, marque a opção "Add CMake to system PATH".
+    - Durante a instalação, marque a opção "Add CMake to system PATH".
 🔹 Visual Studio Build Tools: Baixe e instale em https://visualstudio.microsoft.com/visual-cpp-build-tools/
-    -Durante a instalação, selecione: "Desenvolvimento para C++ Desktop"
+    - Durante a instalação, selecione: "Desenvolvimento para C++ Desktop".
 (Recomenda-se reiniciar o computador após essa etapa para evitar erros na instalação do dlib.)
 
 3️⃣ Atualizar o pip (Evita problemas com pacotes desatualizados)
-🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguinte comando:
-    
+🔹 Abra o terminal e execute:
+
     python -m pip install --upgrade pip
 
 4️⃣ Instalação das dependências principais
-🔹 Vá até a aba Terminal → Novo Terminal (ou pressione Ctrl + J) e digite os seguintes comandos abaixo:
-🔹 Instalar dlib (biblioteca para reconhecimento facial)
+🔹 Instalar `dlib` (biblioteca para reconhecimento facial):
 
     pip install dlib
 
-🔹 Instalar face_recognition (baseado no dlib)
+🔹 Instalar `face_recognition` (baseado no dlib):
 
     pip install face_recognition
 
-🔹 Instalar pacotes matemáticos e de processamento de imagem
+🔹 Instalar pacotes matemáticos e de processamento de imagem:
 
     pip install numpy
-    pip install opencv-python
+    pip install opencv-python-headless
 
-🔹 Certifique-se de que dlib e face_recognition estão atualizados
+🔹 Instalar Flask e dependências:
+
+    pip install flask
+    pip install flask-socketio
+    pip install flask-cors
+
+🔹 Instalar suporte para WebSockets e servidores assíncronos:
+
+    pip install eventlet
+    pip install gevent
+    pip install gevent-websocket
+
+5️⃣ Instalação do MySQL e Variáveis de Ambiente
+🔹 Conectar ao MySQL:
+
+    pip install pymysql
+    pip install mysql-connector-python
+
+🔹 Carregar variáveis de ambiente do `.env`:
+
+    pip install python-dotenv
+
+6️⃣ Atualizar pacotes essenciais:
 
     pip install --upgrade face_recognition dlib
 
-5️⃣ Instalação do MySQL e Variáveis de Ambiente
-🔹 Conectar ao MySQL (diferentes bibliotecas para compatibilidade)
-
-    pip install pymysql
-    pip install mysqlclient
-    pip install mysql-connector-python
-
-🔹 Carregar variáveis de ambiente do .env
-
-    pip install python-dotenv
+✅ Após instalar todas as dependências, execute o sistema normalmente.

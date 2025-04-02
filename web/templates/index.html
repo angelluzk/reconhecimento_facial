@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconhecimento Facial</title>
+
+    <!-- Importação da biblioteca Socket.IO para comunicação em tempo real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .video-container {
+            position: relative;
+            display: inline-block;
+        }
+        img {
+            width: 70%;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        .alert {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-size: 18px;
+        }
+        .success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .error {
+            background-color: #FF5733;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reconhecimento Facial - Sistema Escolar</h1>
+    <!-- Exibição do vídeo ao vivo da câmera. -->
+    <div class="video-container">
+        <img src="{{ url_for('video_feed') }}" alt="Webcam ao vivo">
+    </div>
+
+    <!-- Div onde serão exibidos os alertas. -->
+    <div id="alerta" class="alert"></div>
+
+    <script>
+        // Conecta o cliente ao servidor WebSocket na porta 5000.
+        var socket = io.connect("http://127.0.0.1:5000");
+
+        // Evento disparado quando o cliente se conecta ao WebSocket.
+        socket.on('connect', function() {
+            console.log("✅ Conectado ao servidor SocketIO.");
+            socket.emit("conectado", {mensagem: "Cliente conectado!"});
+        });
+
+        // Evento que escuta mensagens de alerta enviadas pelo servidor.
+        socket.on('alerta', function(data) {
+            console.log("🔔 Alerta recebido:", data.mensagem);
+            var alertaDiv = document.getElementById("alerta");
+            alertaDiv.innerHTML = data.mensagem;
+            alertaDiv.className = "alert " + (data.mensagem.includes('✅') ? "success" : "error");
+            alertaDiv.style.display = "block";
+            setTimeout(function() {
+                alertaDiv.style.display = "none";
+            }, 5000);
+        });
+
+        // Evento disparado quando a conexão com o servidor WebSocket é perdida.
+        socket.on('disconnect', function() {
+            console.log("❌ Desconectado do servidor SocketIO.");
+        });
+    </script>
+</body>
+</html>
