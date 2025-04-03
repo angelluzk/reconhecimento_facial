@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Presença</title>
+</head>
+<body>
+    <h2>Relatório de Presença</h2>
+    <form method="get">
+        <label>Data Início:</label>
+        <input type="date" name="data_inicio" required>
+        <label>Data Fim:</label>
+        <input type="date" name="data_fim" required>
+        <button type="submit">Gerar Relatório</button>
+    </form>
+
+    {% if registros %}
+        <table border="1">
+            <tr>
+                <th>Aluno</th>
+                <th>Tipo de Registro</th>
+                <th>Data/Hora</th>
+            </tr>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.aluno }}</td>
+                <td>{{ registro.tipo_registro }}</td>
+                <td>{{ registro.data_hora }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Nenhum registro encontrado.</p>
+    {% endif %}
+</body>
+</html>
