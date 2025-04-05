@@ -1,85 +1,116 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconhecimento Facial</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reconhecimento Facial - Sistema Escolar</title>
 
-    <!-- Importação da biblioteca Socket.IO para comunicação em tempo real -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        .video-container {
-            position: relative;
-            display: inline-block;
-        }
-        img {
-            width: 70%;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-        .alert {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-            font-size: 18px;
-        }
-        .success {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .error {
-            background-color: #FF5733;
-            color: white;
-        }
-    </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
-<body>
-    <h1>Reconhecimento Facial - Sistema Escolar</h1>
-    <!-- Exibição do vídeo ao vivo da câmera. -->
-    <div class="video-container">
-        <img src="{{ url_for('video_feed') }}" alt="Webcam ao vivo">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+  <header class="bg-blue-600 text-white py-4 shadow">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-xl md:text-2xl font-semibold">Reconhecimento Facial - Sistema Escolar</h1>
+      <a href="{{ url_for('relatorios') }}" target="_blank"
+         class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+        <i class="fas fa-chart-bar mr-2"></i> Ver Relatórios
+      </a>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 flex-1">
+    <div class="flex justify-center">
+      <div class="w-full max-w-4xl">
+        <img src="{{ url_for('video_feed') }}" alt="Transmissão da câmera em tempo real"
+             class="rounded-lg shadow-lg w-full border border-gray-300" />
+      </div>
     </div>
 
-    <!-- Div onde serão exibidos os alertas. -->
-    <div id="alerta" class="alert"></div>
+    <div class="text-center mt-6">
+      <label for="filtro" class="mr-2 font-medium text-lg">Filtrar por:</label>
+      <select id="filtro" class="px-4 py-2 border rounded-md shadow-sm focus:outline-none"
+              onchange="aplicarFiltro()">
+        <option value="todos">Todos</option>
+        <option value="entrada">Entradas</option>
+        <option value="saida">Saídas</option>
+      </select>
+    </div>
 
-    <script>
-        // Conecta o cliente ao servidor WebSocket na porta 5000.
-        var socket = io.connect("http://127.0.0.1:5000");
+    <div id="alerts-container"
+         class="mt-8 max-h-[400px] overflow-y-auto bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
+    </div>
+  </main>
 
-        // Evento disparado quando o cliente se conecta ao WebSocket.
-        socket.on('connect', function() {
-            console.log("✅ Conectado ao servidor SocketIO.");
-            socket.emit("conectado", {mensagem: "Cliente conectado!"});
-        });
+  <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">
+    &copy; {{ year if year else "2025" }} Sistema Escolar com Reconhecimento Facial
+  </footer>
 
-        // Evento que escuta mensagens de alerta enviadas pelo servidor.
-        socket.on('alerta', function(data) {
-            console.log("🔔 Alerta recebido:", data.mensagem);
-            var alertaDiv = document.getElementById("alerta");
-            alertaDiv.innerHTML = data.mensagem;
-            alertaDiv.className = "alert " + (data.mensagem.includes('✅') ? "success" : "error");
-            alertaDiv.style.display = "block";
-            setTimeout(function() {
-                alertaDiv.style.display = "none";
-            }, 5000);
-        });
+  <script>
+    const socket = io.connect("http://127.0.0.1:5000");
 
-        // Evento disparado quando a conexão com o servidor WebSocket é perdida.
-        socket.on('disconnect', function() {
-            console.log("❌ Desconectado do servidor SocketIO.");
-        });
-    </script>
+    socket.on('connect', function () {
+      console.log("✅ Conectado ao servidor SocketIO.");
+    });
+
+    socket.on('alerta', function (data) {
+      console.log("🔔 Alerta recebido:", data.mensagem);
+
+      const container = document.getElementById("alerts-container");
+      const nome = data.nome;
+      const mensagem = data.mensagem;
+      const tipo = data.tipo;
+
+      let alunoDiv = document.getElementById(`aluno-${nome}`);
+      if (!alunoDiv) {
+        alunoDiv = document.createElement("div");
+        alunoDiv.className = "border-l-4 border-blue-500 pl-4";
+        alunoDiv.id = `aluno-${nome}`;
+        alunoDiv.innerHTML = `<div class="text-lg font-semibold text-gray-800 mb-2">${nome}</div>`;
+        container.prepend(alunoDiv);
+      }
+
+      const mensagensExistentes = alunoDiv.querySelectorAll(`.mensagem.${tipo}`);
+      const icone = tipo === "entrada"
+                      ? '<i class="fas fa-sign-in-alt text-green-600"></i>'
+                      : tipo === "saida"
+                      ? '<i class="fas fa-sign-out-alt text-yellow-600"></i>'
+                      : '<i class="fas fa-times-circle text-red-600"></i>';
+
+      const mensagemHTML = `<span class="mr-2">${icone}</span> ${mensagem}`;
+
+      if (mensagensExistentes.length === 0) {
+        const msg = document.createElement("div");
+        msg.className = `mensagem ${tipo} flex items-center bg-gray-100 p-3 rounded-md mb-2 text-base`;
+        msg.setAttribute("data-tipo", tipo);
+        msg.innerHTML = mensagemHTML;
+        alunoDiv.appendChild(msg);
+      } else {
+        mensagensExistentes[0].innerHTML = mensagemHTML;
+      }
+
+      aplicarFiltro();
+
+      container.scrollTop = container.scrollHeight;
+    });
+
+    function aplicarFiltro() {
+      const filtro = document.getElementById("filtro").value;
+      const mensagens = document.querySelectorAll(".mensagem");
+
+      mensagens.forEach(m => {
+        const tipo = m.getAttribute("data-tipo");
+        m.style.display = (filtro === "todos" || tipo === filtro) ? "flex" : "none";
+      });
+    }
+
+    socket.on('disconnect', function () {
+      console.log("❌ Desconectado do servidor SocketIO.");
+    });
+  </script>
+
 </body>
 </html>

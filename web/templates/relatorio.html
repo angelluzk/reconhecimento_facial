@@ -1,36 +1,124 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Relatório de Presença</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório de Presença</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
 </head>
-<body>
-    <h2>Relatório de Presença</h2>
-    <form method="get">
-        <label>Data Início:</label>
-        <input type="date" name="data_inicio" required>
-        <label>Data Fim:</label>
-        <input type="date" name="data_fim" required>
-        <button type="submit">Gerar Relatório</button>
+<body class="bg-gray-100 text-gray-800 min-h-screen p-6">
+
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-3xl font-bold text-center mb-8 text-blue-700">
+      <i class="fas fa-clipboard-list mr-2"></i>Relatório de Presença
+    </h2>
+
+    <form method="get" class="bg-white p-6 rounded-xl shadow-md space-y-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="font-semibold block mb-1">Data Início:</label>
+          <input type="date" name="data_inicio" value="{{ request.args.get('data_inicio', '') }}"
+                class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+        </div>
+
+        <div>
+          <label class="font-semibold block mb-1">Data Fim:</label>
+          <input type="date" name="data_fim" value="{{ request.args.get('data_fim', '') }}"
+                class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+        </div>
+
+        <div>
+          <label class="font-semibold block mb-1">Turno:</label>
+          <select name="turno" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+            <option value="">Todos</option>
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Integral">Integral</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="font-semibold block mb-1">Turma:</label>
+          <input type="text" name="turma" placeholder="Ex: 1º B"
+                class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+        </div>
+
+        <div>
+          <label class="font-semibold block mb-1">Aluno:</label>
+          <input type="text" name="aluno" placeholder="Nome do aluno"
+                class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+        </div>
+
+        <div class="flex items-center space-x-2 pt-6">
+          <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600">
+          <label for="semana_atual" class="font-medium">Mostrar registros da semana atual</label>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow transition">
+          <i class="fas fa-search mr-2"></i>Gerar Relatório
+        </button>
+      </div>
     </form>
 
     {% if registros %}
-        <table border="1">
-            <tr>
-                <th>Aluno</th>
-                <th>Tipo de Registro</th>
-                <th>Data/Hora</th>
-            </tr>
-            {% for registro in registros %}
-            <tr>
-                <td>{{ registro.aluno }}</td>
-                <td>{{ registro.tipo_registro }}</td>
-                <td>{{ registro.data_hora }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+    <div class="overflow-x-auto mt-10">
+      <table class="min-w-full bg-white rounded-xl shadow">
+        <thead class="bg-blue-100 text-blue-800">
+          <tr>
+            <th class="py-3 px-4 text-left font-semibold">Aluno</th>
+            <th class="py-3 px-4 text-left font-semibold">Turma</th>
+            <th class="py-3 px-4 text-left font-semibold">Turno</th>
+            <th class="py-3 px-4 text-left font-semibold">Data</th>
+            <th class="py-3 px-4 text-left font-semibold">Entrada</th>
+            <th class="py-3 px-4 text-left font-semibold">Saída</th>
+            <th class="py-3 px-4 text-left font-semibold">Duração</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          {% for registro in registros %}
+          <tr class="border-t hover:bg-gray-50">
+            <td class="py-2 px-4">{{ registro['aluno'] }}</td>
+            <td class="py-2 px-4">{{ registro['turma'] }}</td>
+            <td class="py-2 px-4">{{ registro['turno'] }}</td>
+            <td class="py-2 px-4">{{ registro['data'].strftime('%d/%m/%Y') if registro['data'] }}</td>
+            <td class="py-2 px-4">
+              {{ registro['horario_entrada'] if registro['horario_entrada'] else '-' }}
+            </td>
+            <td class="py-2 px-4">
+              {{ registro['horario_saida'] if registro['horario_saida'] else '-' }}
+            </td>
+            <td class="py-2 px-4">{{ registro['duracao'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-center mt-10">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Exportar como:</h3>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="{{ url_for('baixar_relatorio', formato='pdf', **request.args) }}"
+           class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+          <i class="fas fa-file-pdf"></i> PDF
+        </a>
+        <a href="{{ url_for('baixar_relatorio', formato='xlsx', **request.args) }}"
+           class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+          <i class="fas fa-file-excel"></i> Excel
+        </a>
+        <a href="{{ url_for('baixar_relatorio', formato='txt', **request.args) }}"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+          <i class="fas fa-file-alt"></i> TXT
+        </a>
+      </div>
+    </div>
+
     {% else %}
-        <p>Nenhum registro encontrado.</p>
+    <p class="text-center text-gray-600 mt-10">Nenhum registro encontrado.</p>
     {% endif %}
+  </div>
 </body>
 </html>

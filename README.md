@@ -1,17 +1,39 @@
-# 📸 Sistema de Reconhecimento Facial para Escolas
+## 📸 Sistema de Reconhecimento Facial para Escolas
 
-Este projeto tem como objetivo registrar a entrada e saída de alunos automaticamente por meio de **reconhecimento facial**. Utilizando **Python**, **OpenCV** e **face_recognition**, o sistema identifica os rostos dos alunos e registra sua presença no banco de dados **MySQL**. O sistema conta com uma interface web simples baseada em **Flask** e **WebSockets** para exibir o vídeo em tempo real e alertas sobre os reconhecimentos.
+Este projeto tem como objetivo registrar a entrada e saída de alunos automaticamente por meio de **reconhecimento facial**. Utilizando **Python**, **OpenCV** e **InsightFace**, o sistema identifica os rostos dos alunos e registra sua presença no banco de dados **MySQL**. A interface web baseada em **Flask** e **WebSockets** permite exibir vídeo em tempo real, alertas persistentes e relatórios completos.
+
+---
+
+## 📸 Funcionalidades
+
+- **Reconhecimento facial em tempo real** via webcam para identificar alunos automaticamente.
+- **Registro automático de entrada e saída** com data e hora no formato brasileiro (dd/mm/aaaa hh:mm:ss).
+- **Interface web** com alertas persistentes por aluno, organizados por nome, e filtros de visualização por tipo de registro (entrada/saída).
+- **Geração de relatórios** com filtros avançados (por aluno, turma, data e tipo de registro).
+- **Exportação de relatórios** em formatos **PDF**, **Excel** e **TXT**.
+- Banco de dados relacional **MySQL** para armazenar dados de alunos e registros de presença.
+- **Comunicação em tempo real** via **WebSocket** (SocketIO), permitindo atualizações instantâneas na interface.
+- **Otimizações de desempenho** para ambientes com muitos alunos (resize de imagem, controle de FPS).
+- **InsightFace** para melhorar a precisão e a performance do reconhecimento facial.
+- **Alertas mais detalhados**, como "Aluno reconhecido e entrada registrada" e "Aluno reconhecido e saída registrada".
+- **Evita duplicação de alertas** por aluno, com controle de tempo para evitar múltiplos alertas em curto intervalo.
+- **Mensagens de sucesso e erro** ao executar um registro, proporcionando uma experiência mais interativa.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
 - **Python 3.7+**
-- **OpenCV** (Processamento de imagens)
-- **Face Recognition** (Reconhecimento facial baseado em dlib)
-- **Flask** (Framework para aplicação web)
-- **Flask-SocketIO** (Comunicação em tempo real via WebSocket)
-- **MySQL** (Banco de dados para armazenamento dos registros de presença)
+- **InsightFace** (Reconhecimento facial baseado em deep learning)
+- **OpenCV** (Processamento de vídeo e imagens)
+- **Flask** (Framework web para a interface)
+- **Flask-SocketIO** (WebSockets para comunicação em tempo real)
+- **MySQL** (Banco de dados relacional)
+- **python-dotenv** (Carregamento de variáveis de ambiente)
+- **Flask-CORS** (Permite requisições de outros domínios)
+- **Eventlet** (Para otimização de WebSockets)
+- **FontAwesome** (Ícones e design visual)
+- **Tailwind CSS** (Para a interface da web)
 
 ---
 
@@ -24,31 +46,31 @@ Baixe e instale o Python pelo site oficial: [https://www.python.org/downloads/](
 
 > **IMPORTANTE**: Durante a instalação, marque a opção **"Add Python to PATH"**.
 
-### 2️⃣ Instale CMake e Visual Studio Build Tools
-Esses pacotes são necessários para compilar o **dlib**, que é usado pelo **face_recognition**.
-
-- **CMake**: Baixe e instale [aqui](https://cmake.org/download/) (Marque a opção **"Add CMake to system PATH"**)
-- **Visual Studio Build Tools**: Baixe e instale [aqui](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-  - Selecione a opção **"Desenvolvimento para C++ Desktop"**
-
-### 3️⃣ Atualize o pip
-Abra um terminal e execute:
+### 2️⃣ Atualize o pip  
+Abra um terminal e execute:  
 ```sh
 python -m pip install --upgrade pip
 ```
 
-### 4️⃣ Instale as dependências principais
-Execute os seguintes comandos no terminal:
+### 3️⃣ Instale as dependências principais
+
+Se você preferir, pode instalar todas as dependências de uma vez, executando o seguinte comando no terminal a partir da pasta do projeto:
+
 ```sh
-pip install dlib
-pip install face_recognition
+pip install -r requisitos.txt
+```
+
+Caso prefira instalar manualmente, execute os seguintes comandos no terminal:
+
+```sh
 pip install numpy opencv-python
 pip install flask flask-socketio
 pip install pymysql mysqlclient mysql-connector-python
 pip install python-dotenv flask-cors eventlet
+pip install insightface onnxruntime pillow
 ```
 
-### 5️⃣ Configuração do Banco de Dados
+### 4️⃣ Configuração do Banco de Dados
 Certifique-se de ter o **MySQL** instalado e crie o banco de dados com a seguinte estrutura:
 ```sql
 CREATE DATABASE reconhecimento_facial;
@@ -57,19 +79,23 @@ USE reconhecimento_facial;
 
 CREATE TABLE alunos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL
+    nome VARCHAR(255) NOT NULL,
+    foto LONGBLOB NOT NULL,
+    turno ENUM('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
+    turma VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE registros_presenca (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_aluno INT,
     tipo_registro ENUM('entrada', 'saida'),
-    data_hora DATETIME,
+    data_hora TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+    turma VARCHAR(10) NOT NULL,
     FOREIGN KEY (id_aluno) REFERENCES alunos(id)
 );
 ```
 
-### 6️⃣ Configuração das Variáveis de Ambiente
+### 5️⃣ Configuração das Variáveis de Ambiente
 Crie um arquivo **.env** na raiz do projeto e adicione suas credenciais do banco de dados:
 ```ini
 DB_HOST=localhost
@@ -83,19 +109,24 @@ DB_NAME=reconhecimento_facial
 ## 🎯 Estrutura do Projeto
 
 ```
-📂 reconhecimento-facial
-├── 📂 database
-│   ├── connection.py   # Conexão com o banco de dados
-├── 📂 modulo1_reconhecimento
-│   ├── engine.py       # Funções de reconhecimento e registro
-│   ├── fotos_alunos/   # Pasta com imagens dos alunos cadastrados
-├── 📂 web
-│   ├── templates/
-│   │   ├── index.html  # Página principal com vídeo ao vivo
-│   ├── app.py         # Servidor Flask para interface web
-├── .env               # Configurações do banco de dados
-├── README.md          # Documentação do projeto
-└── requisitos.txt     # Lista de dependências
+📂 reconhecimento-facial  
+├── 📂 database  
+│   ├── __init__.py          # Inicialização do módulo de banco de dados  
+│   └── connection.py        # Conexão com o banco de dados  
+├── 📂 modulo1_reconhecimento  
+│   ├── __init__.py          # Inicialização do módulo de reconhecimento  
+│   ├── engine.py            # Funções de reconhecimento facial com InsightFace  
+│   ├── stream.py            # Lógica de captura de vídeo ao vivo e streaming  
+│   ├── relatorios.py        # Geração de relatórios de presença  
+│   └── fotos_alunos/        # Pasta com fotos dos alunos cadastrados  
+├── 📂 web  
+│   ├── app.py               # Servidor Flask + WebSocket  
+│   ├── templates/  
+│   │   ├── index.html       # Interface da webcam e alertas  
+│   │   └── relatorio.html   # Relatório de presença  
+├── .env                     # Variáveis de ambiente (configurações do banco de dados)  
+├── README.md                # Documentação do projeto  
+└── requisitos.txt           # Lista de dependências  
 ```
 
 ---
@@ -124,25 +155,28 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 ## 📌 Observações Importantes
 
 - As imagens dos alunos devem ser salvas na pasta **modulo1_reconhecimento/fotos_alunos/**
-- O nome dos arquivos deve corresponder ao nome do aluno cadastrado no banco de dados (exemplo: **joao_silva.jpg**).
+- O nome dos arquivos deve corresponder ao nome do aluno cadastrado no banco de dados (exemplo: **João Alves de Souza.jpg** ou **joao_alves.jpg**). O sistema suporta nomes com espaços e acentos.
 - O sistema diferencia **entrada** e **saída** verificando o último registro do aluno.
+- **Evita duplicação de alertas** por aluno, com um controle para que o mesmo aluno não gere múltiplos alertas em um curto intervalo.
 
 ---
 
-## 🛠️ Futuras Melhorias
+## 🛠️ Lógica do Projeto
 
-- 📌 Interface de cadastro de alunos
-- 📌 Melhor otimização do reconhecimento facial
-- 📌 Relatórios de presença por período
-- 📌 Integração com RFID para aumentar a precisão
+### Módulo 1: Reconhecimento Facial
 
----
+- **Função principal**: O sistema utiliza a biblioteca **InsightFace** para realizar o reconhecimento facial. O rosto do aluno é detectado pela webcam em tempo real e comparado com as fotos cadastradas na pasta `fotos_alunos`.
+  
+- **Registros de Entrada e Saída**: Quando o rosto de um aluno é reconhecido, o sistema registra automaticamente a entrada ou saída no banco de dados, com a data e hora no formato brasileiro (dd/mm/aaaa hh:mm:ss).
 
-## 🤝 Contribuição
-Se quiser contribuir com melhorias, sinta-se à vontade para abrir um **Pull Request** ou relatar problemas na aba **Issues** do repositório!
+- **Alertas**: Os alertas são exibidos na interface, indicando o nome do aluno e o tipo de registro (entrada ou saída). A lista de alertas é persistente, organizada por aluno, e contém cabeçalhos identificando o nome do aluno. As mensagens de alerta são detalhadas e não desaparecem rapidamente para que os operadores possam acompanhar claramente cada aluno que passou pela câmera.
 
 ---
 
-## 📜 Licença
-Este projeto é de código aberto e pode ser utilizado para fins educacionais e acadêmicos. 🚀
+### Módulo 2: Interface Web e Relatórios
 
+- **Interface com WebSocket**: A comunicação em tempo real é realizada via **Flask-SocketIO**, permitindo que os alertas e registros sejam atualizados na interface sem a necessidade de recarregar a página.
+
+- **Relatórios**: A interface oferece a opção de gerar relatórios detalhados sobre os registros de presença. Os relatórios podem ser filtrados por aluno, data ou turma, e exportados para os formatos **PDF**, **Excel** ou **TXT**.
+
+---
