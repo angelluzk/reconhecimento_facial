@@ -23,17 +23,22 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Python 3.7+**
-- **InsightFace** (Reconhecimento facial baseado em deep learning)
-- **OpenCV** (Processamento de vídeo e imagens)
-- **Flask** (Framework web para a interface)
-- **Flask-SocketIO** (WebSockets para comunicação em tempo real)
-- **MySQL** (Banco de dados relacional)
-- **python-dotenv** (Carregamento de variáveis de ambiente)
-- **Flask-CORS** (Permite requisições de outros domínios)
-- **Eventlet** (Para otimização de WebSockets)
-- **FontAwesome** (Ícones e design visual)
-- **Tailwind CSS** (Para a interface da web)
+- **Python 3.7+** – Linguagem principal utilizada no projeto.
+- **InsightFace** – Biblioteca de reconhecimento facial baseada em deep learning.
+- **OpenCV** – Processamento de vídeo e imagens, integração com webcam.
+- **Flask** – Framework web leve para a criação da interface e API.
+- **Flask-SocketIO** – Comunicação em tempo real entre servidor e cliente via WebSockets.
+- **Eventlet** – Gerenciador de conexões assíncronas para suporte ao Flask-SocketIO.
+- **Flask-CORS** – Permite comunicação segura entre o backend e frontend hospedados em origens diferentes.
+- **python-dotenv** – Carrega automaticamente variáveis de ambiente a partir de um arquivo `.env`.
+- **MySQL** – Banco de dados relacional utilizado para armazenar os registros e dados dos alunos.
+- **PyMySQL / MySQLClient / mysql-connector-python** – Conectores Python para integração com o banco de dados MySQL.
+- **Pillow** – Processamento de imagens para leitura e manipulação das fotos dos alunos.
+- **Pandas** – Manipulação de dados tabulares, usado para relatórios.
+- **OpenPyXL** – Exportação de planilhas Excel.
+- **ReportLab** – Geração de arquivos PDF.
+- **Tailwind CSS** – Framework CSS para construção da interface moderna e responsiva.
+- **FontAwesome** – Ícones vetoriais para compor a interface visual.
 
 ---
 
@@ -68,6 +73,7 @@ pip install flask flask-socketio
 pip install pymysql mysqlclient mysql-connector-python
 pip install python-dotenv flask-cors eventlet
 pip install insightface onnxruntime pillow
+pip install pandas openpyxl reportlab
 ```
 
 ### 4️⃣ Configuração do Banco de Dados
