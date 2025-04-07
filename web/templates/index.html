@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reconhecimento Facial - Sistema Escolar</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
   <header class="bg-blue-600 text-white py-4 shadow">
     <div class="container mx-auto px-4 flex justify-between items-center">
       <h1 class="text-xl md:text-2xl font-semibold">Reconhecimento Facial - Sistema Escolar</h1>
       <a href="{{ url_for('relatorios') }}" target="_blank"
-         class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+        class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
         <i class="fas fa-chart-bar mr-2"></i> Ver Relatórios
       </a>
     </div>
   </header>
 
   <main class="container mx-auto px-4 py-8 flex-1">
-    <div class="flex justify-center">
+    <div class="flex justify-center mb-6">
       <div class="w-full max-w-4xl">
         <img src="{{ url_for('video_feed') }}" alt="Transmissão da câmera em tempo real"
-             class="rounded-lg shadow-lg w-full border border-gray-300" />
+          class="rounded-lg shadow-lg w-full border border-gray-300" />
       </div>
     </div>
 
-    <div class="text-center mt-6">
+    <div class="text-center mb-6">
       <label for="filtro" class="mr-2 font-medium text-lg">Filtrar por:</label>
-      <select id="filtro" class="px-4 py-2 border rounded-md shadow-sm focus:outline-none"
-              onchange="aplicarFiltro()">
+      <select id="filtro" class="px-4 py-2 border rounded-md shadow-sm focus:outline-none" onchange="aplicarFiltro()">
         <option value="todos">Todos</option>
         <option value="entrada">Entradas</option>
         <option value="saida">Saídas</option>
@@ -41,28 +41,27 @@
     </div>
 
     <div id="alerts-container"
-         class="mt-8 max-h-[400px] overflow-y-auto bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
+      class="max-h-[400px] overflow-y-auto bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
     </div>
   </main>
 
   <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">
-    &copy; {{ year if year else "2025" }} Sistema Escolar com Reconhecimento Facial
+    &copy; <span id="anoAtual">2025</span> Sistema Escolar com Reconhecimento Facial
   </footer>
 
   <script>
     const socket = io.connect("http://127.0.0.1:5000");
 
-    socket.on('connect', function () {
-      console.log("✅ Conectado ao servidor SocketIO.");
+    socket.on('connect', () => console.log("✅ Conectado ao servidor SocketIO."));
+    socket.on('disconnect', () => console.log("❌ Desconectado do servidor SocketIO."));
+
+    socket.on('alerta', (data) => {
+      console.log("🔔 Alerta recebido:", data.mensagem);
+      renderizarAlerta(data);
     });
 
-    socket.on('alerta', function (data) {
-      console.log("🔔 Alerta recebido:", data.mensagem);
-
+    function renderizarAlerta({ nome, mensagem, tipo }) {
       const container = document.getElementById("alerts-container");
-      const nome = data.nome;
-      const mensagem = data.mensagem;
-      const tipo = data.tipo;
 
       let alunoDiv = document.getElementById(`aluno-${nome}`);
       if (!alunoDiv) {
@@ -75,10 +74,10 @@
 
       const mensagensExistentes = alunoDiv.querySelectorAll(`.mensagem.${tipo}`);
       const icone = tipo === "entrada"
-                      ? '<i class="fas fa-sign-in-alt text-green-600"></i>'
-                      : tipo === "saida"
-                      ? '<i class="fas fa-sign-out-alt text-yellow-600"></i>'
-                      : '<i class="fas fa-times-circle text-red-600"></i>';
+        ? '<i class="fas fa-sign-in-alt text-green-600"></i>'
+        : tipo === "saida"
+          ? '<i class="fas fa-sign-out-alt text-yellow-600"></i>'
+          : '<i class="fas fa-times-circle text-red-600"></i>';
 
       const mensagemHTML = `<span class="mr-2">${icone}</span> ${mensagem}`;
 
@@ -93,9 +92,8 @@
       }
 
       aplicarFiltro();
-
       container.scrollTop = container.scrollHeight;
-    });
+    }
 
     function aplicarFiltro() {
       const filtro = document.getElementById("filtro").value;
@@ -107,10 +105,8 @@
       });
     }
 
-    socket.on('disconnect', function () {
-      console.log("❌ Desconectado do servidor SocketIO.");
-    });
+    document.getElementById("anoAtual").textContent = new Date().getFullYear();
   </script>
-
 </body>
+
 </html>

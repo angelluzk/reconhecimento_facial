@@ -73,6 +73,7 @@ pip install flask flask-socketio
 pip install pymysql mysqlclient mysql-connector-python
 pip install python-dotenv flask-cors eventlet
 pip install insightface onnxruntime pillow
+pip install torch torchvision torchaudio
 pip install pandas openpyxl reportlab
 ```
 
@@ -124,10 +125,10 @@ DB_NAME=reconhecimento_facial
 │   ├── engine.py            # Funções de reconhecimento facial com InsightFace  
 │   ├── stream.py            # Lógica de captura de vídeo ao vivo e streaming  
 │   ├── relatorios.py        # Geração de relatórios de presença  
-│   └── fotos_alunos/        # Pasta com fotos dos alunos cadastrados  
+│   └── 📂 fotos_alunos/        # Pasta com fotos dos alunos cadastrados  
 ├── 📂 web  
 │   ├── app.py               # Servidor Flask + WebSocket  
-│   ├── templates/  
+│   ├── 📂 templates/  
 │   │   ├── index.html       # Interface da webcam e alertas  
 │   │   └── relatorio.html   # Relatório de presença  
 ├── .env                     # Variáveis de ambiente (configurações do banco de dados)  

@@ -3,78 +3,82 @@ import pandas as pd
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+
 from database.connection import get_db_connection
 
 def formatar_data(data):
-    if data:
-        try:
-            return datetime.strptime(str(data), "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y %H:%M:%S")
-        except Exception:
-            return str(data)
-    return "—"
+    try:
+        return datetime.strptime(str(data), "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y %H:%M:%S")
+    except Exception:
+        return str(data) if data else "—"
 
 def calcular_duracao(entrada_str, saida_str):
     try:
         entrada = datetime.strptime(str(entrada_str), "%Y-%m-%d %H:%M:%S")
         saida = datetime.strptime(str(saida_str), "%Y-%m-%d %H:%M:%S")
-        duracao = saida - entrada
-        return str(duracao)
+        return str(saida - entrada)
     except Exception:
         return "—"
 
 def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=None, aluno=None):
     conn = get_db_connection()
     if not conn:
+        print("❌ Não foi possível conectar ao banco de dados.")
         return []
 
-    cursor = conn.cursor(dictionary=True)
-    filtros = []
-    parametros = []
+    try:
+        cursor = conn.cursor(dictionary=True)
+        filtros = []
+        parametros = []
 
-    if data_inicio and data_fim:
-        filtros.append("DATE(r.data_hora) BETWEEN %s AND %s")
-        parametros.extend([data_inicio, data_fim])
-    if turno and turno not in ["", "Todos"]:
-        filtros.append("a.turno = %s")
-        parametros.append(turno)
-    if turma:
-        filtros.append("a.turma = %s")
-        parametros.append(turma)
-    if aluno:
-        filtros.append("a.nome LIKE %s")
-        parametros.append(f"%{aluno}%")
+        if data_inicio and data_fim:
+            filtros.append("DATE(r.data_hora) BETWEEN %s AND %s")
+            parametros.extend([data_inicio, data_fim])
+        if turno and turno not in ["", "Todos"]:
+            filtros.append("a.turno = %s")
+            parametros.append(turno)
+        if turma:
+            filtros.append("a.turma = %s")
+            parametros.append(turma)
+        if aluno:
+            filtros.append("a.nome LIKE %s")
+            parametros.append(f"%{aluno}%")
 
-    where_clause = " AND ".join(filtros) if filtros else "1=1"
+        where_clause = " AND ".join(filtros) if filtros else "1=1"
 
-    query = f"""
-        SELECT 
-            a.nome AS aluno, 
-            a.turma, 
-            a.turno, 
-            DATE(r.data_hora) AS data,
-            MIN(CASE WHEN r.tipo_registro = 'entrada' THEN r.data_hora END) AS horario_entrada,
-            MAX(CASE WHEN r.tipo_registro = 'saida' THEN r.data_hora END) AS horario_saida
-        FROM registros_presenca r 
-        JOIN alunos a ON r.id_aluno = a.id
-        WHERE {where_clause}
-        GROUP BY a.nome, a.turma, a.turno, DATE(r.data_hora)
-        ORDER BY a.turma, a.nome, data
-    """
+        query = f"""
+            SELECT 
+                a.nome AS aluno, 
+                a.turma, 
+                a.turno, 
+                DATE(r.data_hora) AS data,
+                MIN(CASE WHEN r.tipo_registro = 'entrada' THEN r.data_hora END) AS horario_entrada,
+                MAX(CASE WHEN r.tipo_registro = 'saida' THEN r.data_hora END) AS horario_saida
+            FROM registros_presenca r 
+            JOIN alunos a ON r.id_aluno = a.id
+            WHERE {where_clause}
+            GROUP BY a.nome, a.turma, a.turno, DATE(r.data_hora)
+            ORDER BY a.turma, a.nome, data
+        """
 
-    cursor.execute(query, tuple(parametros))
-    registros = cursor.fetchall()
-    cursor.close()
-    conn.close()
+        cursor.execute(query, tuple(parametros))
+        registros = cursor.fetchall()
 
-    for reg in registros:
-        entrada_raw = reg['horario_entrada']
-        saida_raw = reg['horario_saida']
+        for reg in registros:
+            entrada_raw = reg['horario_entrada']
+            saida_raw = reg['horario_saida']
+            reg['horario_entrada'] = formatar_data(entrada_raw)
+            reg['horario_saida'] = formatar_data(saida_raw)
+            reg['duracao'] = calcular_duracao(entrada_raw, saida_raw)
 
-        reg['horario_entrada'] = formatar_data(entrada_raw)
-        reg['horario_saida'] = formatar_data(saida_raw)
-        reg['duracao'] = calcular_duracao(entrada_raw, saida_raw)
+        return registros
 
-    return registros
+    except Exception as e:
+        print(f"❌ Erro ao gerar relatório: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
 
 def gerar_pdf(registros):
     buffer = io.BytesIO()

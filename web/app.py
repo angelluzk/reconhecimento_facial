@@ -1,30 +1,32 @@
-import sys
 import os
-import threading
+import sys
 import time
+import threading
 import webbrowser
 from datetime import datetime, date, timedelta
 
 from flask import Flask, render_template, Response, request, send_file
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from modulo1_reconhecimento.engine import get_rostos
-from modulo1_reconhecimento.relatorios import gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
+from modulo1_reconhecimento.relatorios import (
+    gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
+)
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 @app.template_filter('datetimeformat')
 def datetimeformat(value, format='%d/%m/%Y %H:%M:%S'):
-    if isinstance(value, datetime):
-        return value.strftime(format)
-    if isinstance(value, str):
-        try:
+    try:
+        if isinstance(value, datetime):
+            return value.strftime(format)
+        elif isinstance(value, str):
             return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(format)
-        except ValueError:
-            return value
+    except ValueError:
+        pass
     return value
 
 @socketio.on('connect')
@@ -51,12 +53,15 @@ def relatorios():
 
     if semana_atual:
         hoje = date.today()
-        inicio_semana = hoje - timedelta(days=hoje.weekday())
-        fim_semana = inicio_semana + timedelta(days=6)
-        data_inicio = inicio_semana.strftime('%Y-%m-%d')
-        data_fim = fim_semana.strftime('%Y-%m-%d')
+        data_inicio = (hoje - timedelta(days=hoje.weekday())).strftime('%Y-%m-%d')
+        data_fim = (hoje + timedelta(days=6 - hoje.weekday())).strftime('%Y-%m-%d')
 
-    registros = gerar_relatorio_presenca(data_inicio, data_fim, turno, turma, aluno)
+    try:
+        registros = gerar_relatorio_presenca(data_inicio, data_fim, turno, turma, aluno)
+    except Exception as e:
+        print(f"❌ Erro ao gerar relatório: {e}")
+        registros = []
+
     return render_template('relatorio.html', registros=registros)
 
 @app.route('/baixar_relatorio/<formato>')
@@ -69,20 +74,17 @@ def baixar_relatorio(formato):
 
     registros = gerar_relatorio_presenca(data_inicio, data_fim, turno, turma, aluno)
 
-    if formato == 'pdf':
-        buffer = gerar_pdf(registros)
-        mimetype = 'application/pdf'
-        ext = 'pdf'
-    elif formato == 'xlsx':
-        buffer = gerar_excel(registros)
-        mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        ext = 'xlsx'
-    elif formato == 'txt':
-        buffer = gerar_txt(registros)
-        mimetype = 'text/plain'
-        ext = 'txt'
-    else:
+    formatos_validos = {
+        'pdf': ('application/pdf', gerar_pdf, 'pdf'),
+        'xlsx': ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', gerar_excel, 'xlsx'),
+        'txt': ('text/plain', gerar_txt, 'txt'),
+    }
+
+    if formato not in formatos_validos:
         return "❌ Formato de relatório inválido.", 400
+
+    mimetype, funcao_geradora, ext = formatos_validos[formato]
+    buffer = funcao_geradora(registros)
 
     return send_file(buffer, mimetype=mimetype, as_attachment=True, download_name=f'relatorio_presenca.{ext}')
 
@@ -95,4 +97,4 @@ def abrir_navegador():
 
 if __name__ == "__main__":
     threading.Thread(target=abrir_navegador).start()
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False, use_reloader=False)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=False)
