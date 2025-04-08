@@ -4,6 +4,8 @@ import numpy as np
 from datetime import datetime, timedelta
 from insightface.app import FaceAnalysis
 from database.connection import get_db_connection
+import unicodedata
+import re
 
 try:
     import torch
@@ -15,6 +17,10 @@ face_app = FaceAnalysis(name='buffalo_l')
 face_app.prepare(ctx_id=ctx_id)
 
 TEMPO_ESPERA_MINUTOS = 10
+
+def nome_para_arquivo(nome):
+    nome_sem_acentos = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
+    return re.sub(r'\W+', '_', nome_sem_acentos).strip('_')
 
 def ler_imagem_unicode(caminho):
     try:
@@ -36,29 +42,54 @@ def reconhece_face(url_foto):
     return (True, [r.embedding for r in rostos]) if rostos else (False, [])
 
 def get_rostos():
-    rostos_conhecidos, nomes_dos_rostos = [], []
-    pasta_fotos = os.path.join(os.path.abspath(
-        os.path.dirname(__file__)), "fotos_alunos")
+    embeddings_dir = os.path.join(os.path.dirname(__file__), 'embeddings_cache')
+    rostos_conhecidos = []
+    nomes_dos_rostos = []
 
-    for arquivo in os.listdir(pasta_fotos):
-        if arquivo.lower().endswith(('png', 'jpg', 'jpeg')):
-            caminho_imagem = os.path.join(pasta_fotos, arquivo)
-            nome_aluno = os.path.splitext(arquivo)[0].replace('_', ' ')
-            sucesso, rostos = reconhece_face(caminho_imagem)
-            if sucesso and rostos:
-                rostos_conhecidos.append(rostos[0])
-                nomes_dos_rostos.append(nome_aluno)
-            else:
-                print(f"[AVISO] Rosto não detectado em: {arquivo}")
+    if not os.path.exists(embeddings_dir):
+        print("[AVISO] Diretório de embeddings não encontrado.")
+        return [], []
 
+    for arquivo in os.listdir(embeddings_dir):
+        if arquivo.endswith('.npy'):
+            try:
+                caminho = os.path.join(embeddings_dir, arquivo)
+                embedding = np.load(caminho)
+                nome_arquivo = os.path.splitext(arquivo)[0]
+                partes = nome_arquivo.split('_')
+                if partes and partes[0].isdigit():
+                    id_aluno = int(partes[0])
+                    nome = obter_nome_por_id(id_aluno)
+                    if nome:
+                        rostos_conhecidos.append(embedding)
+                        nomes_dos_rostos.append(nome)
+            except Exception as e:
+                print(f"[ERRO] Falha ao carregar embedding {arquivo}: {e}")
+
+    print(f"[INFO] {len(rostos_conhecidos)} embeddings carregados do cache")
     return rostos_conhecidos, nomes_dos_rostos
+
+def obter_nome_por_id(id_aluno):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print(f"[ERRO] Sem conexão com o banco de dados.")
+            return None
+        cursor = conn.cursor()
+        cursor.execute("SELECT nome FROM alunos WHERE id = %s", (id_aluno,))
+        resultado = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return resultado[0] if resultado else None
+    except Exception as e:
+        print(f"[ERRO] Erro ao buscar nome do aluno {id_aluno}: {e}")
+        return None
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def verificar_identidade(embedding_desconhecido, conhecidos, nomes, threshold=0.5):
-    similaridades = [cosine_similarity(
-        embedding_desconhecido, emb) for emb in conhecidos]
+    similaridades = [cosine_similarity(embedding_desconhecido, emb) for emb in conhecidos]
     if not similaridades:
         return None
     idx_mais_proximo = np.argmax(similaridades)
@@ -74,17 +105,17 @@ def registrar_ocorrencia(nome_aluno):
 
     conn = get_db_connection()
     if not conn:
-        return None, "❌ Erro ao conectar ao banco de dados"
+        return None, "❌ Erro ao conectar ao banco de dados."
 
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute(
-        "SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))
+    cursor.execute("SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))
     aluno = cursor.fetchone()
 
     if not aluno:
+        cursor.close()
         conn.close()
-        return None, "⚠️ Aluno não encontrado no banco de dados"
+        return None, "⚠️ Aluno não encontrado no banco de dados."
 
     id_aluno = aluno['id']
     turma = aluno['turma']
@@ -101,11 +132,11 @@ def registrar_ocorrencia(nome_aluno):
     if ultimo_registro:
         tempo_ultimo = ultimo_registro['data_hora']
         if tempo_ultimo > (agora - timedelta(minutes=TEMPO_ESPERA_MINUTOS)):
+            cursor.close()
             conn.close()
-            return None, "⏳ Registro ignorado (último registro há menos de 10 minutos)"
+            return None, "⏳ Registro ignorado (último registro há menos de 10 minutos)."
 
-    tipo_registro = "entrada" if not ultimo_registro or ultimo_registro[
-        'tipo_registro'] == "saida" else "saida"
+    tipo_registro = "entrada" if not ultimo_registro or ultimo_registro['tipo_registro'] == "saida" else "saida"
 
     cursor.execute("""
         INSERT INTO registros_presenca (id_aluno, turma, tipo_registro, data_hora)
@@ -117,3 +148,6 @@ def registrar_ocorrencia(nome_aluno):
     conn.close()
 
     return tipo_registro, f"✅ Aluno {nome_aluno} ({turma}) reconhecido e {tipo_registro} registrada!"
+
+def carregar_face_model():
+    return face_app

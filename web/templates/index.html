@@ -8,105 +8,67 @@
   <title>Reconhecimento Facial - Sistema Escolar</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
   <header class="bg-blue-600 text-white py-4 shadow">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <h1 class="text-xl md:text-2xl font-semibold">Reconhecimento Facial - Sistema Escolar</h1>
-      <a href="{{ url_for('relatorios') }}" target="_blank"
-        class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
-        <i class="fas fa-chart-bar mr-2"></i> Ver Relatórios
-      </a>
+    <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <h1 class="text-xl md:text-2xl font-semibold text-center sm:text-left">Reconhecimento Facial - Sistema Escolar</h1>
+      <div class="flex gap-2">
+        <a href="{{ url_for('relatorios') }}" target="_blank"
+          class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+          <i class="fas fa-chart-bar mr-2"></i>Ver Relatórios
+        </a>
+        <a href="{{ url_for('cadastro') }}"
+          class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition text-sm font-medium">
+          <i class="fas fa-user-plus mr-2"></i>Cadastrar Alunos
+        </a>
+      </div>
     </div>
   </header>
 
   <main class="container mx-auto px-4 py-8 flex-1">
-    <div class="flex justify-center mb-6">
+    <div class="flex flex-col items-center mb-8 space-y-4">
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <button id="botao-webcam" type="button" class="btn-azul">
+          <i class="fas fa-play mr-2"></i>Ligar Webcam
+        </button>
+
+        <button id="trocar-camera" type="button" class="btn-roxo">
+          <i class="fas fa-sync-alt mr-2"></i>Trocar Câmera
+        </button>
+      </div>
+
       <div class="w-full max-w-4xl">
-        <img src="{{ url_for('video_feed') }}" alt="Transmissão da câmera em tempo real"
-          class="rounded-lg shadow-lg w-full border border-gray-300" />
+        <img id="video-stream" src="" alt="Transmissão ao vivo da webcam"
+          class="rounded-lg shadow-lg w-full border border-gray-300 hidden" />
       </div>
     </div>
 
     <div class="text-center mb-6">
       <label for="filtro" class="mr-2 font-medium text-lg">Filtrar por:</label>
-      <select id="filtro" class="px-4 py-2 border rounded-md shadow-sm focus:outline-none" onchange="aplicarFiltro()">
+      <select id="filtro" class="filtro-select" onchange="aplicarFiltro()">
         <option value="todos">Todos</option>
         <option value="entrada">Entradas</option>
         <option value="saida">Saídas</option>
       </select>
     </div>
 
-    <div id="alerts-container"
-      class="max-h-[400px] overflow-y-auto bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
-    </div>
+    <section id="alerts-container"
+      class="max-h-[400px] overflow-y-auto bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200"
+      aria-live="polite" aria-label="Alertas de presença">
+    </section>
   </main>
 
   <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">
     &copy; <span id="anoAtual">2025</span> Sistema Escolar com Reconhecimento Facial
   </footer>
 
-  <script>
-    const socket = io.connect("http://127.0.0.1:5000");
-
-    socket.on('connect', () => console.log("✅ Conectado ao servidor SocketIO."));
-    socket.on('disconnect', () => console.log("❌ Desconectado do servidor SocketIO."));
-
-    socket.on('alerta', (data) => {
-      console.log("🔔 Alerta recebido:", data.mensagem);
-      renderizarAlerta(data);
-    });
-
-    function renderizarAlerta({ nome, mensagem, tipo }) {
-      const container = document.getElementById("alerts-container");
-
-      let alunoDiv = document.getElementById(`aluno-${nome}`);
-      if (!alunoDiv) {
-        alunoDiv = document.createElement("div");
-        alunoDiv.className = "border-l-4 border-blue-500 pl-4";
-        alunoDiv.id = `aluno-${nome}`;
-        alunoDiv.innerHTML = `<div class="text-lg font-semibold text-gray-800 mb-2">${nome}</div>`;
-        container.prepend(alunoDiv);
-      }
-
-      const mensagensExistentes = alunoDiv.querySelectorAll(`.mensagem.${tipo}`);
-      const icone = tipo === "entrada"
-        ? '<i class="fas fa-sign-in-alt text-green-600"></i>'
-        : tipo === "saida"
-          ? '<i class="fas fa-sign-out-alt text-yellow-600"></i>'
-          : '<i class="fas fa-times-circle text-red-600"></i>';
-
-      const mensagemHTML = `<span class="mr-2">${icone}</span> ${mensagem}`;
-
-      if (mensagensExistentes.length === 0) {
-        const msg = document.createElement("div");
-        msg.className = `mensagem ${tipo} flex items-center bg-gray-100 p-3 rounded-md mb-2 text-base`;
-        msg.setAttribute("data-tipo", tipo);
-        msg.innerHTML = mensagemHTML;
-        alunoDiv.appendChild(msg);
-      } else {
-        mensagensExistentes[0].innerHTML = mensagemHTML;
-      }
-
-      aplicarFiltro();
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function aplicarFiltro() {
-      const filtro = document.getElementById("filtro").value;
-      const mensagens = document.querySelectorAll(".mensagem");
-
-      mensagens.forEach(m => {
-        const tipo = m.getAttribute("data-tipo");
-        m.style.display = (filtro === "todos" || tipo === filtro) ? "flex" : "none";
-      });
-    }
-
-    document.getElementById("anoAtual").textContent = new Date().getFullYear();
-  </script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 
 </html>

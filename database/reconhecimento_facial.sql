@@ -11,7 +11,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `alunos` (
   `id` int(11) NOT NULL,
   `nome` varchar(255) NOT NULL,
-  `foto` longblob NOT NULL,
+  `foto` varchar(255) NOT NULL,
   `turno` enum('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
   `turma` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

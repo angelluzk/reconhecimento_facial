@@ -1,12 +1,20 @@
 ## 📸 Sistema de Reconhecimento Facial para Escolas
 
+<p align="center">
+  <img src="imagens/projeto_reconhecimento_facial.png" alt="Reconhecimento Facial" width="800"/>
+  <br/>
+  <em>📷 Interface Web do sistema de reconhecimento facial em funcionamento...</em>
+</p>
+
 Este projeto tem como objetivo registrar a entrada e saída de alunos automaticamente por meio de **reconhecimento facial**. Utilizando **Python**, **OpenCV** e **InsightFace**, o sistema identifica os rostos dos alunos e registra sua presença no banco de dados **MySQL**. A interface web baseada em **Flask** e **WebSockets** permite exibir vídeo em tempo real, alertas persistentes e relatórios completos.
 
 ---
 
-## 📸 Funcionalidades
+## 🧠 Funcionalidades
 
 - **Reconhecimento facial em tempo real** via webcam para identificar alunos automaticamente.
+- **Cadastro de alunos** com nome, turma, turno e envio de foto.
+- **Treinamento de rostos** armazenados com uso de embeddings otimizados.
 - **Registro automático de entrada e saída** com data e hora no formato brasileiro (dd/mm/aaaa hh:mm:ss).
 - **Interface web** com alertas persistentes por aluno, organizados por nome, e filtros de visualização por tipo de registro (entrada/saída).
 - **Geração de relatórios** com filtros avançados (por aluno, turma, data e tipo de registro).
@@ -23,22 +31,23 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Python 3.7+** – Linguagem principal utilizada no projeto.
-- **InsightFace** – Biblioteca de reconhecimento facial baseada em deep learning.
-- **OpenCV** – Processamento de vídeo e imagens, integração com webcam.
-- **Flask** – Framework web leve para a criação da interface e API.
-- **Flask-SocketIO** – Comunicação em tempo real entre servidor e cliente via WebSockets.
-- **Eventlet** – Gerenciador de conexões assíncronas para suporte ao Flask-SocketIO.
-- **Flask-CORS** – Permite comunicação segura entre o backend e frontend hospedados em origens diferentes.
-- **python-dotenv** – Carrega automaticamente variáveis de ambiente a partir de um arquivo `.env`.
-- **MySQL** – Banco de dados relacional utilizado para armazenar os registros e dados dos alunos.
-- **PyMySQL / MySQLClient / mysql-connector-python** – Conectores Python para integração com o banco de dados MySQL.
-- **Pillow** – Processamento de imagens para leitura e manipulação das fotos dos alunos.
-- **Pandas** – Manipulação de dados tabulares, usado para relatórios.
-- **OpenPyXL** – Exportação de planilhas Excel.
-- **ReportLab** – Geração de arquivos PDF.
-- **Tailwind CSS** – Framework CSS para construção da interface moderna e responsiva.
-- **FontAwesome** – Ícones vetoriais para compor a interface visual.
+- **Python 3.7+**
+- **InsightFace**
+- **OpenCV**
+- **Flask**
+- **Flask-SocketIO**
+- **Eventlet**
+- **Flask-CORS**
+- **python-dotenv**
+- **MySQL**
+- **PyMySQL / MySQLClient / mysql-connector-python**
+- **Pillow**
+- **Pandas**
+- **OpenPyXL**
+- **ReportLab**
+- **Torch / TorchVision / TorchAudio**
+- **Tailwind CSS**
+- **FontAwesome**
 
 ---
 
@@ -87,7 +96,7 @@ USE reconhecimento_facial;
 CREATE TABLE alunos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
-    foto LONGBLOB NOT NULL,
+    foto VARCHAR(255) NOT NULL,
     turno ENUM('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
     turma VARCHAR(10) NOT NULL
 );
@@ -118,22 +127,34 @@ DB_NAME=reconhecimento_facial
 ```
 📂 reconhecimento-facial  
 ├── 📂 database  
-│   ├── __init__.py          # Inicialização do módulo de banco de dados  
-│   └── connection.py        # Conexão com o banco de dados  
+│   ├── __init__.py          
+│   ├── connection.py        
+│   └── reconhecimento_facil.sql    
 ├── 📂 modulo1_reconhecimento  
-│   ├── __init__.py          # Inicialização do módulo de reconhecimento  
-│   ├── engine.py            # Funções de reconhecimento facial com InsightFace  
-│   ├── stream.py            # Lógica de captura de vídeo ao vivo e streaming  
-│   ├── relatorios.py        # Geração de relatórios de presença  
-│   └── 📂 fotos_alunos/        # Pasta com fotos dos alunos cadastrados  
-├── 📂 web  
-│   ├── app.py               # Servidor Flask + WebSocket  
-│   ├── 📂 templates/  
-│   │   ├── index.html       # Interface da webcam e alertas  
-│   │   └── relatorio.html   # Relatório de presença  
-├── .env                     # Variáveis de ambiente (configurações do banco de dados)  
-├── README.md                # Documentação do projeto  
-└── requisitos.txt           # Lista de dependências  
+│   ├── __init__.py 
+│   ├── cadastro.py         
+│   ├── engine.py            
+│   ├── stream.py            
+│   ├── relatorios.py        
+│   ├── 📂 fotos_alunos/        
+│   └── 📂 embeddings_cache/    
+├── 📂 web 
+│   ├── 📂 static/ 
+│   │   ├── 📂 css/ 
+│   │   │     ├── cadastro.css
+│   │   │     ├── index.css
+│   │   ├── 📂 js/ 
+│   │   │     ├── cadastro.js
+│   │   │     ├── index.js
+│   │   │     ├── relatorio.js
+│   ├── 📂 templates/
+│   │   ├── cadastro.html
+│   │   ├── index.html       
+│   │   └── relatorio.html   
+│   ├── app.py               
+├── .env                     
+├── README.md                
+└── requisitos.txt             
 ```
 
 ---
@@ -159,31 +180,36 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 
 ---
 
-## 📌 Observações Importantes
+## 📌 Observações
 
-- As imagens dos alunos devem ser salvas na pasta **modulo1_reconhecimento/fotos_alunos/**
-- O nome dos arquivos deve corresponder ao nome do aluno cadastrado no banco de dados (exemplo: **João Alves de Souza.jpg** ou **joao_alves.jpg**). O sistema suporta nomes com espaços e acentos.
-- O sistema diferencia **entrada** e **saída** verificando o último registro do aluno.
-- **Evita duplicação de alertas** por aluno, com um controle para que o mesmo aluno não gere múltiplos alertas em um curto intervalo.
+- As imagens dos alunos devem estar na pasta `fotos_alunos/`
+- O nome da imagem deve ser igual ao nome do aluno cadastrado.
+- Suporta nomes com espaços e acentos.
+- Utiliza embeddings em cache para acelerar o reconhecimento.
+- Entradas e saídas são diferenciadas com base no último registro.
+- Evita múltiplos alertas em curto período para o mesmo aluno.
 
 ---
 
 ## 🛠️ Lógica do Projeto
 
-### Módulo 1: Reconhecimento Facial
+### Módulo 1: Reconhecimento Facial e Cadastro
 
-- **Função principal**: O sistema utiliza a biblioteca **InsightFace** para realizar o reconhecimento facial. O rosto do aluno é detectado pela webcam em tempo real e comparado com as fotos cadastradas na pasta `fotos_alunos`.
-  
-- **Registros de Entrada e Saída**: Quando o rosto de um aluno é reconhecido, o sistema registra automaticamente a entrada ou saída no banco de dados, com a data e hora no formato brasileiro (dd/mm/aaaa hh:mm:ss).
-
-- **Alertas**: Os alertas são exibidos na interface, indicando o nome do aluno e o tipo de registro (entrada ou saída). A lista de alertas é persistente, organizada por aluno, e contém cabeçalhos identificando o nome do aluno. As mensagens de alerta são detalhadas e não desaparecem rapidamente para que os operadores possam acompanhar claramente cada aluno que passou pela câmera.
-
----
+- Cadastro de alunos com nome, turma, turno e envio de foto pela interface web.
+- Fotos salvas na pasta `fotos_alunos/` com o nome do aluno.
+- Treinamento automático após o cadastro: a imagem é convertida em um **embedding facial** com o InsightFace.
+- Embeddings são salvos em cache na pasta `embeddings_cache/`, evitando reprocessamento e acelerando o reconhecimento.
+- Durante o uso, o rosto detectado via webcam é comparado com os embeddings armazenados.
+- Registro automático de **entrada** ou **saída** com base no último registro do aluno.
+- Sistema de alertas por aluno, exibidos de forma clara e organizada na interface.
 
 ### Módulo 2: Interface Web e Relatórios
 
-- **Interface com WebSocket**: A comunicação em tempo real é realizada via **Flask-SocketIO**, permitindo que os alertas e registros sejam atualizados na interface sem a necessidade de recarregar a página.
-
-- **Relatórios**: A interface oferece a opção de gerar relatórios detalhados sobre os registros de presença. Os relatórios podem ser filtrados por aluno, data ou turma, e exportados para os formatos **PDF**, **Excel** ou **TXT**.
+- Interface web interativa para cadastro, visualização da câmera e relatórios.
+- Comunicação em tempo real com **SocketIO** (WebSocket).
+- Alertas visuais dinâmicos informando ações realizadas (cadastro, reconhecimento, entrada/saída).
+- Relatórios filtráveis por nome, turma, data e tipo de registro (entrada ou saída).
+- Exportação de relatórios em **PDF**, **Excel** e **TXT** com um clique.
+- Interface moderna utilizando **TailwindCSS** e componentes reutilizáveis.
 
 ---

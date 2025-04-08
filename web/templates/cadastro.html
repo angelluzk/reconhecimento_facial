@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Alunos</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-lg space-y-4">
+    <h1 class="text-2xl font-bold text-center">Cadastro de Alunos</h1>
+
+    <form id="cadastro-form" class="space-y-4">
+      <input type="text" name="nome" placeholder="Nome completo" class="w-full p-2 border rounded" required>
+      
+      <select name="turno" class="w-full p-2 border rounded" required>
+        <option value="">Selecione o turno</option>
+        <option value="manhã">Manhã</option>
+        <option value="tarde">Tarde</option>
+        <option value="integral">Integral</option>
+      </select>
+
+      <input type="text" name="turma" placeholder="Turma (ex: 3°A)" class="w-full p-2 border rounded" required>
+
+      <div class="text-center">
+        <button type="submit" id="botao-captura" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Iniciar Captura Facial
+        </button>
+      </div>
+    </form>
+
+    <div class="text-center">
+      <button id="botao-webcam" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mr-2">
+        <i class="fas fa-play mr-1"></i>Ligar Webcam
+      </button>
+      <button id="botao-trocar-camera" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">
+        🔄 Trocar Câmera
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <video id="video" autoplay playsinline class="rounded w-full hidden"></video>
+      <canvas id="canvas" class="hidden"></canvas>
+      <div id="preview-container" class="grid grid-cols-5 gap-2"></div>
+    </div>
+
+    <p id="status" class="text-center text-sm text-gray-600"></p>
+
+    <div class="text-center">
+      <a href="/" class="inline-block mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded transition">
+        ⬅ Voltar ao Início
+      </a>
+    </div>
+  </div>
+
+  <div id="successModal" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <div id="modalContent" class="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-sm text-center space-y-4 transform transition-transform scale-95">
+      <button id="fecharModal" class="botao-fechar-modal" aria-label="Fechar modal">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <h2 class="text-2xl font-bold text-green-600">✅ Cadastro Concluído...</h2>
+      <p class="text-gray-700">O aluno foi cadastrado com sucesso!</p>
+      <div class="flex justify-center gap-4">
+        <a href="/" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Voltar</a>
+        <button id="repetirCadastro" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Novo Cadastro</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="successSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9c1911be49.mp3?filename=correct-2-46134.mp3" preload="auto"></audio>
+
+  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/cadastro.js') }}"></script>
+</body>
+</html>
