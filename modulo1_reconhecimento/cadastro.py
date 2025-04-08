@@ -60,6 +60,10 @@ def gerar_embedding(face_img):
     return faces[0].embedding
 
 def processar_cadastro_web(nome, turma, turno, imagem_bytes, index):
+    turno = (turno or '').strip()
+    if not turno:
+        turno = 'integral'
+
     nome_formatado = nome.strip()
     nome_arquivo = nome_para_arquivo(nome_formatado)
 

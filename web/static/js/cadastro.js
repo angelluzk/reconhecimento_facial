@@ -75,10 +75,10 @@ form.addEventListener('submit', async e => {
   previewContainer.innerHTML = "";
   const formData = new FormData(form);
   const nomeOriginal = formData.get('nome').trim();
-  const turno = formData.get('turno');
+  const turno = formData.get('turno') || 'integral';
   const turma = formData.get('turma');
 
-  if (!nomeOriginal || !turno || !turma) {
+  if (!nomeOriginal || !turma) {
     alert("Preencha todos os campos!!");
     bloqueado = false;
     return;
@@ -109,7 +109,7 @@ form.addEventListener('submit', async e => {
     const uploadData = new FormData();
     uploadData.append('foto', blob, `${nomeArquivo}_${i}.jpg`);
     uploadData.append('nome', nomeOriginal);
-    uploadData.append('turno', turno);
+    uploadData.append('turno', turno); 
     uploadData.append('turma', turma);
     uploadData.append('index', i);
     uploadData.append('total', totalFotos);
