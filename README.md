@@ -73,7 +73,17 @@ Se você já tiver uma versão diferente do Python instalada, recomendo o uso de
 
 ---
 
-### 2️⃣ Atualize o `pip`, `setuptools` e `wheel`
+### 2️⃣ Instale o Visual Studio Build Tools
+
+ - **Visual Studio Build Tools**: Baixe e instale [aqui](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+   - Selecione a opção **"Desenvolvimento para C++ Desktop"**
+   - Deixe marcada a versão do **MSVC v14.x (MSVC v142 ou mais recente)**.
+
+**Finalize a instalação e reinicie o computador.**
+
+---
+
+### 3️⃣ Atualize o `pip`, `setuptools` e `wheel`
 
 Antes de instalar as dependências, é importante garantir que você está com as ferramentas de build atualizadas:
 
@@ -81,7 +91,7 @@ Antes de instalar as dependências, é importante garantir que você está com a
 python -m pip install --upgrade pip setuptools wheel
 ```
 
-### 3️⃣ Instale todas as dependências do projeto
+### 4️⃣ Instale todas as dependências do projeto
 
 Você pode instalar tudo de uma vez com:
 
@@ -115,7 +125,7 @@ pip install setuptools>=69.5.1 wheel>=0.43.0
 
 ---
 
-### 4️⃣ Instale e configure o MySQL
+### 5️⃣ Instale e configure o MySQL
 
 Para que o sistema funcione corretamente, é necessário ter o **MySQL** instalado localmente.
 
@@ -156,7 +166,7 @@ CREATE TABLE registros_presenca (
 ```
 ---
 
-### 5️⃣ Configuração das Variáveis de Ambiente
+### 6️⃣ Configuração das Variáveis de Ambiente
 Crie um arquivo **.env** na raiz do projeto e adicione suas credenciais do banco de dados:
 ```ini
 DB_HOST=localhost
