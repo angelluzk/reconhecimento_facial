@@ -5,7 +5,7 @@
 <p align="center">
   <img src="imagens/projeto_reconhecimento_facial.png" alt="Reconhecimento Facial" width="800"/>
   <br/>
-  <em>📷 Interface Web do sistema de reconhecimento facial em funcionamento...</em>
+  📷<em>Interface Web do sistema de reconhecimento facial em funcionamento...</em>
 </p>
 
 Este projeto tem como objetivo registrar a entrada e saída de alunos automaticamente por meio de **reconhecimento facial**. Utilizando **Python**, **OpenCV** e **InsightFace**, o sistema identifica os rostos dos alunos e registra sua presença no banco de dados **MySQL**. A interface web baseada em **Flask** e **WebSockets** permite exibir vídeo em tempo real, alertas persistentes e relatórios completos.
