@@ -1,4 +1,6 @@
-## 📸 Sistema de Reconhecimento Facial para Escolas
+<h1 align="center">
+  🎓📸 Sistema de Reconhecimento Facial para Escolas
+</h1>
 
 <p align="center">
   <img src="imagens/projeto_reconhecimento_facial.png" alt="Reconhecimento Facial" width="800"/>
@@ -55,39 +57,81 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 Antes de iniciar o sistema, siga os passos abaixo para configurar o ambiente corretamente:
 
-### 1️⃣ Instale o Python 3.7 ou superior
-Baixe e instale o Python pelo site oficial: [https://www.python.org/downloads/](https://www.python.org/downloads/)
+### 1️⃣ Instale o Python 3.10 (recomendado)
 
-> **IMPORTANTE**: Durante a instalação, marque a opção **"Add Python to PATH"**.
+Baixe e instale o Python pelo site oficial:  
+🔗 [https://www.python.org/downloads/](https://www.python.org/downloads/)
 
-### 2️⃣ Atualize o pip  
-Abra um terminal e execute:  
+> ⚠️ **IMPORTANTE**:  
+> Durante a instalação, marque a opção **"Add Python to PATH"** antes de prosseguir.
+
+#### 💡 Por que a versão 3.10?
+
+Algumas bibliotecas usadas neste projeto (como `insightface`, `onnxruntime` e versões específicas do `torch`) **ainda não são totalmente compatíveis com o Python 3.11 ou superior**. Para evitar erros de instalação ou incompatibilidade durante o uso, recomendo fortemente utilizar o **Python 3.10**.
+
+Se você já tiver uma versão diferente do Python instalada, recomendo o uso de um ambiente virtual com a versão correta. 
+
+---
+
+### 2️⃣ Atualize o `pip`, `setuptools` e `wheel`
+
+Antes de instalar as dependências, é importante garantir que você está com as ferramentas de build atualizadas:
+
 ```sh
-python -m pip install --upgrade pip
+python -m pip install --upgrade pip setuptools wheel
 ```
 
-### 3️⃣ Instale as dependências principais
+### 3️⃣ Instale todas as dependências do projeto
 
-Se você preferir, pode instalar todas as dependências de uma vez, executando o seguinte comando no terminal a partir da pasta do projeto:
+Você pode instalar tudo de uma vez com:
 
 ```sh
 pip install -r requisitos.txt
 ```
 
-Caso prefira instalar manualmente, execute os seguintes comandos no terminal:
+Esse comando irá instalar todas as bibliotecas necessárias, incluindo:
+
+- **Processamento Numérico e Dados**: `numpy`, `pandas`, `openpyxl`, `reportlab`
+- **Visão Computacional**: `opencv-python`, `pillow`
+- **Inteligência Artificial / Deep Learning**: `torch`, `torchvision`, `torchaudio`, `insightface`, `onnxruntime`
+- **Backend Web**: `flask`, `flask-cors`, `flask-socketio`, `eventlet`, `python-dotenv`
+- **Banco de Dados MySQL**: `pymysql`, `mysqlclient`, `mysql-connector-python`
+
+Caso queira instalar manualmente (não recomendado), aqui estão os comandos divididos por categoria:
 
 ```sh
-pip install numpy opencv-python
-pip install flask flask-socketio
-pip install pymysql mysqlclient mysql-connector-python
-pip install python-dotenv flask-cors eventlet
-pip install insightface onnxruntime pillow
-pip install torch torchvision torchaudio
-pip install pandas openpyxl reportlab
+pip install numpy==1.24.4 pandas==2.2.1 openpyxl==3.1.2 reportlab==4.1.0
+
+pip install opencv-python==4.11.0.86 pillow==10.3.0
+
+pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 insightface==0.7.3 onnxruntime==1.21.0
+
+pip install flask==3.1.0 flask-cors==5.0.1 flask-socketio==5.3.0 eventlet==0.33.0 python-dotenv==1.0.1
+
+pip install pymysql==1.0.2 mysqlclient==2.2.0 mysql-connector-python==9.2.0
+
+pip install setuptools>=69.5.1 wheel>=0.43.0
 ```
 
-### 4️⃣ Configuração do Banco de Dados
-Certifique-se de ter o **MySQL** instalado e crie o banco de dados com a seguinte estrutura:
+---
+
+### 4️⃣ Instale e configure o MySQL
+
+Para que o sistema funcione corretamente, é necessário ter o **MySQL** instalado localmente.
+
+#### ✅ Recomendado: MySQL 8.0.33 ou superior (Community Edition)
+
+- Baixe pelo site oficial: [https://dev.mysql.com/downloads/mysql/](https://dev.mysql.com/downloads/mysql/)
+- Durante a instalação, **selecione o método de autenticação _Legacy_ (`mysql_native_password`)**, caso a opção seja oferecida.
+
+> ⚠️ Evite usar versões muito antigas (como a 5.x), pois podem causar **incompatibilidades com os conectores utilizados no projeto** (`mysqlclient`, `pymysql`, `mysql-connector-python`).
+
+---
+
+#### 🗃️ Criação do banco de dados e tabelas
+
+Com o MySQL instalado e em execução, abra o terminal do MySQL e execute os comandos abaixo para criar o banco de dados e suas respectivas tabelas:
+
 ```sql
 CREATE DATABASE reconhecimento_facial;
 
@@ -97,7 +141,7 @@ CREATE TABLE alunos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     foto VARCHAR(255) NOT NULL,
-    turno ENUM('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
+    turno ENUM('manhã', 'tarde', 'integral') NOT NULL DEFAULT 'integral',
     turma VARCHAR(10) NOT NULL
 );
 
@@ -110,6 +154,7 @@ CREATE TABLE registros_presenca (
     FOREIGN KEY (id_aluno) REFERENCES alunos(id)
 );
 ```
+---
 
 ### 5️⃣ Configuração das Variáveis de Ambiente
 Crie um arquivo **.env** na raiz do projeto e adicione suas credenciais do banco de dados:
@@ -119,6 +164,7 @@ DB_USER=root
 DB_PASSWORD=sua_senha
 DB_NAME=reconhecimento_facial
 ```
+> Esse arquivo armazena as **credenciais de acesso ao banco de dados** de forma segura, evitando a exposição de dados sensíveis no código.
 
 ---
 
@@ -211,5 +257,13 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 - Relatórios filtráveis por nome, turma, data e tipo de registro (entrada ou saída).
 - Exportação de relatórios em **PDF**, **Excel** e **TXT** com um clique.
 - Interface moderna utilizando **TailwindCSS** e componentes reutilizáveis.
+```markdown
+---
+
+## 📬 Contato
+
+Este projeto foi desenvolvido por Angelita Luz 
+🔗 [GitHub](https://github.com/angelluzk) • [LinkedIn](https://linkedin.com/in/angelitaluz)
+```
 
 ---
