@@ -1,4 +1,6 @@
-## 📸 Sistema de Reconhecimento Facial para Escolas
+<h1 align="center">
+  📸 Sistema de Reconhecimento Facial para Escolas
+</h1>
 
 <p align="center">
   <img src="imagens/projeto_reconhecimento_facial.png" alt="Reconhecimento Facial" width="800"/>
