@@ -60,7 +60,8 @@ Antes de iniciar o sistema, siga os passos abaixo para configurar o ambiente cor
 ### 1️⃣ Instale o Python 3.10 (recomendado)
 
 Baixe e instale o Python pelo site oficial:  
-🔗 [https://www.python.org/downloads/](https://www.python.org/downloads/)
+🔗 [https://www.python.org/downloads/release/python-3100/]
+Link direto para baixar: [https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe]
 
 > ⚠️ **IMPORTANTE**:  
 > Durante a instalação, marque a opção **"Add Python to PATH"** antes de prosseguir.
