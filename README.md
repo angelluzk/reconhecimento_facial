@@ -257,13 +257,12 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 - Relatórios filtráveis por nome, turma, data e tipo de registro (entrada ou saída).
 - Exportação de relatórios em **PDF**, **Excel** e **TXT** com um clique.
 - Interface moderna utilizando **TailwindCSS** e componentes reutilizáveis.
-```markdown
+
 ---
 
 ## 📬 Contato
 
 Este projeto foi desenvolvido por Angelita Luz 
 🔗 [GitHub](https://github.com/angelluzk) • [LinkedIn](https://linkedin.com/in/angelitaluz)
-```
 
 ---
