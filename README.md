@@ -127,7 +127,16 @@ pip install numpy==1.24.4 pandas==2.2.1 openpyxl==3.1.2 reportlab==4.1.0
 
 pip install opencv-python==4.11.0.86 pillow==10.3.0
 
-pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 insightface==0.7.3 onnxruntime==1.21.0
+pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 insightface==0.7.3
+
+# ⚙️ ONNX Runtime
+# Use APENAS UMA das versões abaixo ⬇️
+# 👉 Para computadores comuns (CPU)
+pip install onnxruntime==1.21.0
+
+# ⚡ Para quem tem placa de vídeo NVIDIA (GPU)
+# Requer CUDA configurado corretamente
+pip install onnxruntime-gpu==1.21.0
 
 pip install flask==3.1.0 flask-cors==5.0.1 flask-socketio==5.3.0 eventlet==0.33.0 python-dotenv==1.0.1
 
