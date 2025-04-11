@@ -146,11 +146,12 @@ def cadastrar_aluno():
     try:
         nome = request.form['nome']
         turno = request.form['turno']
+        ano = request.form['ano']
         turma = request.form['turma']
         index = int(request.form.get('index', '1'))
         imagem_bytes = request.files['foto'].read()
 
-        processar_cadastro_web(nome, turma, turno, imagem_bytes, index)
+        processar_cadastro_web(nome, ano, turma, turno, imagem_bytes, index)
 
         if index == 10:
             total = recarregar_embeddings()

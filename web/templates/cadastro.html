@@ -5,20 +5,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cadastro de Alunos</title>
+
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-lg space-y-4">
-    <h1 class="text-2xl font-bold text-center">Cadastro de Alunos</h1>
+  <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-2xl space-y-6">
 
-    <form id="cadastro-form" class="space-y-4">
+    <h1 class="text-3xl font-bold text-center text-blue-700 mb-4">Cadastro de Alunos</h1>
+
+    <form id="cadastro-form" class="space-y-6 relative">
+
       <input type="hidden" name="turno" value="integral">
-      <input type="text" name="nome" placeholder="Nome completo" class="w-full p-2 border rounded" required>
 
-      <!-- Campo de turno comentado temporariamente -->
-      <!-- 
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500">
+          <i class="fa-solid fa-user"></i>
+        </span>
+        <input type="text" name="nome" placeholder="Nome completo do aluno" required
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 transition uppercase" />
+      </div>
+
+      <!-- Campo de turno comentado temporariamente  
       <select name="turno" class="w-full p-2 border rounded" required>
         <option value="">Selecione o turno</option>
         <option value="manhã">Manhã</option>
@@ -27,63 +39,112 @@
       </select> 
       -->
 
-      <input type="text" name="turma" placeholder="Turma (ex: 3°A)" class="w-full p-2 border rounded" required>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Ano:</label>
+          <div class="space-y-2">
+            <label class="flex items-center space-x-2">
+              <input type="radio" name="ano" value="1º" required class="form-radio text-blue-600">
+              <span>1º Ano</span>
+            </label>
+            <label class="flex items-center space-x-2">
+              <input type="radio" name="ano" value="2º" class="form-radio text-blue-600">
+              <span>2º Ano</span>
+            </label>
+            <label class="flex items-center space-x-2">
+              <input type="radio" name="ano" value="3º" class="form-radio text-blue-600">
+              <span>3º Ano</span>
+            </label>
+          </div>
+        </div>
 
-      <div class="text-center">
-        <button type="submit" id="botao-captura"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Iniciar Captura Facial
-        </button>
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Turma:</label>
+          <div class="grid grid-cols-3 gap-2">
+            {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="turma" value="{{ turma }}" required class="form-radio text-blue-600">
+              <span>{{ turma }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="relative my-8">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="bg-white px-3 text-gray-500 font-medium">
+            <i class="fa-solid fa-video mr-1 text-blue-600"></i>Captura Facial
+          </span>
+        </div>
+      </div>
+
+      <div id="webcam-container" class="relative space-y-4">
+
+        <div id="loader"
+          class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-20 rounded-lg">
+          <div class="animate-pulse text-blue-600 flex items-center gap-2 text-lg font-semibold">
+            <i class="fa-solid fa-spinner fa-spin fa-lg"></i>
+            Processando...
+          </div>
+        </div>
+
+        <div class="text-center">
+          <button type="button" id="botao-webcam"
+            class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded-lg shadow transition transform hover:scale-105">
+            <i class="fa-solid fa-video"></i> Ligar Webcam
+          </button>
+        </div>
+
+        <video id="video" autoplay playsinline class="rounded w-full hidden shadow-lg border"></video>
+        <canvas id="canvas" class="hidden"></canvas>
+
+        <div class="flex justify-center">
+          <button type="submit" id="botao-captura"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow transition duration-300 transform hover:scale-105 flex items-center gap-2">
+            <i class="fa-solid fa-camera"></i>
+            Iniciar Captura Facial
+          </button>
+        </div>
+
+        <div id="preview-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"></div>
+
+        <p id="status" class="text-center text-sm text-gray-500 mt-4 italic"></p>
+
+        <div class="text-center">
+          <a href="/"
+            class="inline-block mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded transition">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao Início
+          </a>
+        </div>
       </div>
     </form>
 
-    <div class="text-center">
-      <button id="botao-webcam" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mr-2">
-        <i class="fas fa-play mr-1"></i>Ligar Webcam
-      </button>
-      <button id="botao-trocar-camera" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">
-        🔄 Trocar Câmera
-      </button>
-    </div>
-
-    <div class="space-y-4">
-      <video id="video" autoplay playsinline class="rounded w-full hidden"></video>
-      <canvas id="canvas" class="hidden"></canvas>
-      <div id="preview-container" class="grid grid-cols-5 gap-2"></div>
-    </div>
-
-    <p id="status" class="text-center text-sm text-gray-600"></p>
-
-    <div class="text-center">
-      <a href="/" class="inline-block mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded transition">
-        ⬅ Voltar ao Início
-      </a>
-    </div>
-  </div>
-
-  <div id="successModal" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex items-center justify-center">
-    <div id="modalContent"
-      class="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-sm text-center space-y-4 transform transition-transform scale-95">
-      <button id="fecharModal" class="botao-fechar-modal" aria-label="Fechar modal">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <h2 class="text-2xl font-bold text-green-600">✅ Cadastro Concluído...</h2>
-      <p class="text-gray-700">O aluno foi cadastrado com sucesso!</p>
-      <div class="flex justify-center gap-4">
-        <a href="/" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Voltar</a>
-        <button id="repetirCadastro" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Novo Cadastro</button>
+    <div id="successModal" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex items-center justify-center">
+      <div id="modalContent"
+        class="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-sm text-center space-y-4 transform transition-transform scale-95">
+        <button id="fecharModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          aria-label="Fechar modal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+        <h2 class="text-2xl font-bold text-green-600"><i class="fa-solid fa-check-circle"></i> Cadastro Concluído</h2>
+        <p class="text-gray-700">O aluno foi cadastrado com sucesso!</p>
+        <div class="flex justify-center gap-4">
+          <a href="/" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Voltar</a>
+          <button id="repetirCadastro" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Novo Cadastro</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <audio id="successSound"
-    src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9c1911be49.mp3?filename=correct-2-46134.mp3"
-    preload="auto"></audio>
+    <audio id="successSound"
+      src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9c1911be49.mp3?filename=correct-2-46134.mp3"
+      preload="auto"></audio>
 
-  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
-  <script src="{{ url_for('static', filename='js/cadastro.js') }}"></script>
+    <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/cadastro.js') }}"></script>
 </body>
 
 </html>

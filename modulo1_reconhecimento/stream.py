@@ -16,7 +16,7 @@ camera = None
 camera_index = 0
 streaming = False
 
-rostos_conhecidos, nomes_dos_rostos = get_rostos()
+rostos_conhecidos, infos_dos_rostos = get_rostos()
 tempo_ultima_ocorrencia = {}
 tempo_ultimo_alerta_desconhecido = datetime.min
 
@@ -39,24 +39,29 @@ def liberar_camera():
     print("🎥 Webcam desligada")
 
 def recarregar_embeddings():
-    global rostos_conhecidos, nomes_dos_rostos
-    rostos_conhecidos, nomes_dos_rostos = get_rostos()
+    global rostos_conhecidos, infos_dos_rostos
+    rostos_conhecidos, infos_dos_rostos = get_rostos()
     return len(rostos_conhecidos)
 
 def desenhar_texto(frame, texto, posicao, cor=(255, 255, 255), cor_fundo=(0, 0, 0)):
     imagem_pil = Image.fromarray(frame)
     draw = ImageDraw.Draw(imagem_pil)
     try:
-        font = ImageFont.truetype("arial.ttf", 20)
+        font = ImageFont.truetype("arial.ttf", 18)
     except IOError:
         font = ImageFont.load_default()
 
     bbox = draw.textbbox((0, 0), texto, font=font)
     largura_texto = bbox[2] - bbox[0]
     altura_texto = bbox[3] - bbox[1]
-    x, y = posicao
-    draw.rectangle([x, y, x + largura_texto + 6, y + altura_texto + 4], fill=cor_fundo)
-    draw.text((x + 3, y + 2), texto, font=font, fill=cor)
+
+    centro_x = posicao[0]
+    y = posicao[1]
+
+    x = int(centro_x - (largura_texto / 2))
+
+    draw.rectangle([x - 3, y, x + largura_texto + 3, y + altura_texto + 4], fill=cor_fundo)
+    draw.text((x, y + 2), texto, font=font, fill=cor)
 
     return np.array(imagem_pil)
 
@@ -100,37 +105,42 @@ def gerar_frames(socketio):
             melhor_sim = similaridades[melhor_id] if melhor_id != -1 else 0
 
             if melhor_sim > SIMILARITY_THRESHOLD:
-                nome = nomes_dos_rostos[melhor_id]
+                info = infos_dos_rostos[melhor_id]
+                nome = info["nome"]
+                turma = info["turma"]
+                texto_exibicao = f"{nome} ({turma})"
                 cor = (0, 255, 0)
 
                 if nome in tempo_ultima_ocorrencia and (agora - tempo_ultima_ocorrencia[nome]) < timedelta(minutes=TEMPO_ESPERA_MINUTOS):
-                    mensagem = f"⏳ {nome} já registrado recentemente!! Ignorado..."
+                    mensagem = f"⏳ {texto_exibicao} já registrado recentemente! Ignorado..."
                     tipo = "info"
                 else:
-                    tipo_registro, mensagem = registrar_ocorrencia(nome)
+                    nome_padronizado = nome.strip().upper()
+                    tipo_registro, mensagem = registrar_ocorrencia(nome_padronizado)
                     tempo_ultima_ocorrencia[nome] = agora
                     tipo = tipo_registro if tipo_registro in ["entrada", "saida"] else "info"
 
                 socketio.emit('alerta', {
                     'mensagem': mensagem,
-                    'nome': nome,
+                    'nome': texto_exibicao,
                     'tipo': tipo
                 }, namespace='/')
 
             else:
-                nome = "Desconhecido"
+                texto_exibicao = "Desconhecido"
                 cor = (0, 0, 255)
 
                 if (agora - tempo_ultimo_alerta_desconhecido) > timedelta(seconds=5):
                     socketio.emit('alerta', {
                         'mensagem': "⚠️ Rosto não reconhecido! Registro não realizado...",
-                        'nome': nome,
+                        'nome': texto_exibicao,
                         'tipo': "erro"
                     }, namespace='/')
                     tempo_ultimo_alerta_desconhecido = agora
 
             cv2.rectangle(frame, (left, top), (right, bottom), cor, 2)
-            frame = desenhar_texto(frame, nome, (left, bottom + 10))
+            meio_caixa = (left + right) // 2
+            frame = desenhar_texto(frame, texto_exibicao, (meio_caixa, bottom + 10))
 
         _, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()

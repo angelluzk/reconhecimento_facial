@@ -12,6 +12,11 @@
 <body class="bg-gray-100 text-gray-800 min-h-screen p-6">
 
   <div class="max-w-7xl mx-auto">
+    <a href="{{ url_for('index') }}"
+      class="inline-flex items-center bg-white border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold px-5 py-2 rounded-lg shadow transition mb-6">
+      <i class="fas fa-arrow-left mr-2"></i>Voltar para a Tela Inicial
+    </a>
+
     <h2 class="text-3xl font-bold text-center mb-8 text-blue-700">
       <i class="fas fa-clipboard-list mr-2"></i>Relatório de Presença
     </h2>
@@ -55,8 +60,8 @@
         </div>
 
         <div class="flex items-center space-x-2 pt-6">
-          <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600"
-            {% if request.args.get('semana_atual') %}checked{% endif %}>
+          <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600" {% if
+            request.args.get('semana_atual') %}checked{% endif %}>
           <label for="semana_atual" class="font-medium">Mostrar registros da semana atual</label>
         </div>
       </div>
@@ -94,9 +99,8 @@
             data-aluno="{{ registro['aluno'] }}" data-turma="{{ registro['turma'] }}"
             data-turno="{{ registro['turno'] }}"
             data-data="{{ registro['data'].strftime('%d/%m/%Y') if registro['data'] else '' }}"
-            data-entrada="{{ registro['horario_entrada'] or '-' }}"
-            data-saida="{{ registro['horario_saida'] or '-' }}" data-duracao="{{ registro['duracao'] }}"
-            onclick="mostrarDetalhesComDataset(this)">
+            data-entrada="{{ registro['horario_entrada'] or '-' }}" data-saida="{{ registro['horario_saida'] or '-' }}"
+            data-duracao="{{ registro['duracao'] }}" onclick="mostrarDetalhesComDataset(this)">
             <td class="py-2 px-4">{{ registro['aluno'] }}</td>
             <td class="py-2 px-4">{{ registro['turma'] }}</td>
             <td class="py-2 px-4">{{ registro['turno'] }}</td>
@@ -138,8 +142,7 @@
     {% endif %}
   </div>
 
-  <div id="modal"
-    class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
     <div class="bg-white p-6 rounded-xl shadow-xl max-w-md w-full text-center">
       <h3 class="text-xl font-bold mb-4 text-blue-700">Detalhes da Presença</h3>
       <div class="text-gray-700 space-y-2">

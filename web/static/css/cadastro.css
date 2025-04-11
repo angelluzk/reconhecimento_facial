@@ -1,31 +1,45 @@
 .modal {
-    background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#video {
+  border: 2px solid #D1D5DB;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+
+.botao-fechar-modal {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  color: #4B5563;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.botao-fechar-modal:hover {
+  background-color: #f3f4f6;
+  color: #EF4444;
+}
+
+.radio-group label {
+  margin-right: 10px;
+  font-weight: normal;
+}
+
+#loader .fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  #video {
-    border: 2px solid #D1D5DB;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 0.5rem;
-  }
-  
-  .botao-fechar-modal {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    color: #4B5563;
-    background-color: #ffffff;
-    border-radius: 9999px;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    transition: background-color 0.2s, color 0.2s;
-  }
-  
-  .botao-fechar-modal:hover {
-    background-color: #f3f4f6;
-    color: #EF4444;
-  }
-  
+}

@@ -9,8 +9,8 @@ const repetirBtn = document.getElementById('repetirCadastro');
 const successSound = document.getElementById('successSound');
 const botaoWebcam = document.getElementById('botao-webcam');
 const botaoCaptura = document.getElementById('botao-captura');
-const botaoTrocarCamera = document.getElementById('botao-trocar-camera');
 const fecharModalBtn = document.getElementById('fecharModal');
+const loader = document.getElementById('loader');
 
 let stream = null;
 let webcamLigada = false;
@@ -49,37 +49,32 @@ botaoWebcam.addEventListener("click", () => {
   webcamLigada ? desligarWebcam() : ligarWebcam();
 });
 
-botaoTrocarCamera.addEventListener("click", () => {
-  cameraFrontal = !cameraFrontal;
-  if (webcamLigada) ligarWebcam();
-});
-
-navigator.mediaDevices.enumerateDevices().then(devices => {
-  const cameras = devices.filter(device => device.kind === 'videoinput');
-  if (cameras.length <= 1) {
-    botaoTrocarCamera.classList.add('hidden');
-  }
-});
-
-form.addEventListener('submit', async e => {
+botaoCaptura.addEventListener('click', async e => {
   e.preventDefault();
   if (bloqueado) return;
   bloqueado = true;
 
   if (!webcamLigada) {
-    alert("Ligue a webcam antes de iniciar a captura!!");
+    alert("Ligue a webcam antes de iniciar a captura!");
     bloqueado = false;
     return;
   }
 
   previewContainer.innerHTML = "";
-  const formData = new FormData(form);
-  const nomeOriginal = formData.get('nome').trim();
-  const turno = formData.get('turno') || 'integral';
-  const turma = formData.get('turma');
 
-  if (!nomeOriginal || !turma) {
-    alert("Preencha todos os campos!!");
+  const formData = new FormData(form);
+
+  const nomeOriginal = formData.get('nome').trim().toUpperCase();
+  const turno = formData.get('turno') || 'integral';
+
+  const anoSelecionado = form.querySelector('input[name="ano"]:checked');
+  const turmaSelecionada = form.querySelector('input[name="turma"]:checked');
+
+  const ano = anoSelecionado ? anoSelecionado.value : "";
+  const turma = turmaSelecionada ? turmaSelecionada.value : "";
+
+  if (!nomeOriginal || !ano || !turma) {
+    alert("Preencha todos os campos!");
     bloqueado = false;
     return;
   }
@@ -89,8 +84,10 @@ form.addEventListener('submit', async e => {
     .replace(/\W+/g, "_")
     .replace(/^_+|_+$/g, "");
 
-  statusText.textContent = "📸 Iniciando captura de imagens...";
   const totalFotos = 10;
+
+  if (loader) loader.classList.remove("hidden");
+  statusText.innerHTML = '<i class="fas fa-camera mr-1"></i> Iniciando captura de imagens...';
 
   for (let i = 1; i <= totalFotos; i++) {
     await new Promise(r => setTimeout(r, 500));
@@ -109,20 +106,28 @@ form.addEventListener('submit', async e => {
     const uploadData = new FormData();
     uploadData.append('foto', blob, `${nomeArquivo}_${i}.jpg`);
     uploadData.append('nome', nomeOriginal);
-    uploadData.append('turno', turno); 
+    uploadData.append('turno', turno);
+    uploadData.append('ano', ano);
     uploadData.append('turma', turma);
     uploadData.append('index', i);
     uploadData.append('total', totalFotos);
 
-    await fetch('/cadastrar_aluno', {
+    const resposta = await fetch('/cadastrar_aluno', {
       method: 'POST',
       body: uploadData
     });
 
-    statusText.textContent = `📷 Captura ${i}/${totalFotos}`;
+    const json = await resposta.json();
+    if (!resposta.ok || !json.sucesso) {
+      alert(`Erro ao enviar imagem ${i}: ${json.erro || resposta.statusText}`);
+      break;
+    }
+
+    statusText.innerHTML = `<i class="fas fa-camera mr-1"></i> Captura ${i}/${totalFotos}`;
   }
 
   statusText.textContent = "";
+  if (loader) loader.classList.add("hidden");
   successSound.play();
   mostrarModal();
   desligarWebcam();

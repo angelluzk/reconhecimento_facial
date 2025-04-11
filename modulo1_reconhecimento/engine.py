@@ -44,7 +44,7 @@ def reconhece_face(url_foto):
 def get_rostos():
     embeddings_dir = os.path.join(os.path.dirname(__file__), 'embeddings_cache')
     rostos_conhecidos = []
-    nomes_dos_rostos = []
+    infos_dos_rostos = []
 
     if not os.path.exists(embeddings_dir):
         print("[AVISO] Diretório de embeddings não encontrado.")
@@ -59,15 +59,15 @@ def get_rostos():
                 partes = nome_arquivo.split('_')
                 if partes and partes[0].isdigit():
                     id_aluno = int(partes[0])
-                    nome = obter_nome_por_id(id_aluno)
-                    if nome:
+                    info = obter_info_por_id(id_aluno)
+                    if info:
                         rostos_conhecidos.append(embedding)
-                        nomes_dos_rostos.append(nome)
+                        infos_dos_rostos.append(info)
             except Exception as e:
                 print(f"[ERRO] Falha ao carregar embedding {arquivo}: {e}")
 
     print(f"[INFO] {len(rostos_conhecidos)} embeddings carregados do cache")
-    return rostos_conhecidos, nomes_dos_rostos
+    return rostos_conhecidos, infos_dos_rostos
 
 def obter_nome_por_id(id_aluno):
     try:
@@ -103,13 +103,15 @@ def registrar_ocorrencia(nome_aluno):
     agora = datetime.now()
     data_atual = agora.strftime('%Y-%m-%d')
 
+    nome_aluno = nome_aluno.strip().upper()
+
     conn = get_db_connection()
     if not conn:
         return None, "❌ Erro ao conectar ao banco de dados."
 
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))
+    cursor.execute("SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))  
     aluno = cursor.fetchone()
 
     if not aluno:
@@ -151,3 +153,19 @@ def registrar_ocorrencia(nome_aluno):
 
 def carregar_face_model():
     return face_app
+
+def obter_info_por_id(id_aluno):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print(f"[ERRO] Sem conexão com o banco de dados.")
+            return None
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM alunos WHERE id = %s", (id_aluno,))
+        resultado = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return resultado
+    except Exception as e:
+        print(f"[ERRO] Erro ao buscar info do aluno {id_aluno}: {e}")
+        return None
