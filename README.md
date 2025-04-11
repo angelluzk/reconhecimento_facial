@@ -33,25 +33,33 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ## 🚀 Tecnologias Utilizadas
 
-<p align="left">
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/InsightFace-blue?style=for-the-badge&logo=ai&logoColor=white" alt="InsightFace" />
-  <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
-  <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
-  <img src="https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.IO" />
-  <img src="https://img.shields.io/badge/Eventlet-00cc99?style=for-the-badge" alt="Eventlet" />
-  <img src="https://img.shields.io/badge/CORS-0066cc?style=for-the-badge" alt="Flask-CORS" />
-  <img src="https://img.shields.io/badge/Dotenv-8b949e?style=for-the-badge" alt="python-dotenv" />
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
-  <img src="https://img.shields.io/badge/PyMySQL-00688B?style=for-the-badge" alt="PyMySQL" />
-  <img src="https://img.shields.io/badge/Pillow-4B8BBE?style=for-the-badge" alt="Pillow" />
-  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas" />
-  <img src="https://img.shields.io/badge/OpenPyXL-17A2B8?style=for-the-badge" alt="OpenPyXL" />
-  <img src="https://img.shields.io/badge/ReportLab-343a40?style=for-the-badge" alt="ReportLab" />
-  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/FontAwesome-528DD7?style=for-the-badge&logo=fontawesome&logoColor=white" alt="FontAwesome" />
-</p>
+<div style="display: flex" align="left">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="35" title="HTML5" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" height="35" title="CSS3" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="35" title="JavaScript" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="35" title="Python" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opencv/opencv-original.svg" height="35" title="OpenCV" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg" height="35" title="Flask" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/socketio/socketio-original.svg" height="35" title="Socket.IO" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" height="35" title="MySQL" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg" height="35" title="Pandas" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" height="35" title="PyTorch" />
+</div>
+
+<br/>
+
+> 🔧 Outras ferramentas, bibliotecas e dependências:
+> - **InsightFace**  
+> - **Eventlet**  
+> - **Flask-CORS**  
+> - **python-dotenv**  
+> - **PyMySQL / mysql-connector-python / MySQLClient**  
+> - **Pillow**  
+> - **OpenPyXL**  
+> - **ReportLab**  
+> - **TorchVision / TorchAudio**  
+> - **FontAwesome**  
+> - **Tailwind CSS**
 
 ---
 
