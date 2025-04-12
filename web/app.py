@@ -159,8 +159,8 @@ def cadastrar_aluno():
 
         return jsonify({"sucesso": True})
     except Exception as e:
-        print(f"❌ Erro ao cadastrar aluno: {e}")
-        return jsonify({"erro": "Erro ao cadastrar aluno."}), 500
+        print(f"❌ Erro ao cadastrar aluno(a): {e}")
+        return jsonify({"erro": "Erro ao cadastrar aluno(a)."}), 500
 
 @app.route('/recarregar_embeddings', methods=['POST'])
 def atualizar_embeddings():
@@ -190,7 +190,7 @@ def detalhes_aluno(aluno_id):
 
         return jsonify({"aluno": aluno, "historico": historico})
     except Exception as e:
-        print(f"❌ Erro ao buscar detalhes do aluno: {e}")
+        print(f"❌ Erro ao buscar detalhes do aluno(a): {e}")
         return jsonify({"erro": "Erro ao buscar dados"}), 500
 
 def abrir_navegador():

@@ -82,7 +82,7 @@ def obter_nome_por_id(id_aluno):
         conn.close()
         return resultado[0] if resultado else None
     except Exception as e:
-        print(f"[ERRO] Erro ao buscar nome do aluno {id_aluno}: {e}")
+        print(f"[ERRO] Erro ao buscar nome do(a) aluno(a) {id_aluno}: {e}")
         return None
 
 def cosine_similarity(a, b):
@@ -111,16 +111,19 @@ def registrar_ocorrencia(nome_aluno):
 
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))  
+    cursor.execute("SELECT id, turma FROM alunos WHERE nome = %s", (nome_aluno,))
     aluno = cursor.fetchone()
 
     if not aluno:
         cursor.close()
         conn.close()
-        return None, "⚠️ Aluno não encontrado no banco de dados."
+        return None, "⚠️ Aluno(a) não encontrado(a) no banco de dados."
 
     id_aluno = aluno['id']
     turma = aluno['turma']
+
+    while cursor.nextset():
+        pass
 
     cursor.execute("""
         SELECT id, tipo_registro, data_hora 
@@ -140,6 +143,9 @@ def registrar_ocorrencia(nome_aluno):
 
     tipo_registro = "entrada" if not ultimo_registro or ultimo_registro['tipo_registro'] == "saida" else "saida"
 
+    while cursor.nextset():
+        pass
+
     cursor.execute("""
         INSERT INTO registros_presenca (id_aluno, turma, tipo_registro, data_hora)
         VALUES (%s, %s, %s, %s)
@@ -149,7 +155,7 @@ def registrar_ocorrencia(nome_aluno):
     cursor.close()
     conn.close()
 
-    return tipo_registro, f"✅ Aluno {nome_aluno} ({turma}) reconhecido e {tipo_registro} registrada!"
+    return tipo_registro, f"✅ Aluno(a) {nome_aluno} ({turma}) reconhecido(a) e {tipo_registro} registrada!"
 
 def carregar_face_model():
     return face_app
@@ -167,5 +173,5 @@ def obter_info_por_id(id_aluno):
         conn.close()
         return resultado
     except Exception as e:
-        print(f"[ERRO] Erro ao buscar info do aluno {id_aluno}: {e}")
+        print(f"[ERRO] Erro ao buscar informação do aluno(a) {id_aluno}: {e}")
         return None

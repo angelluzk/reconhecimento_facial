@@ -89,9 +89,9 @@ def processar_cadastro_web(nome, ano, turma_letra, turno, imagem_bytes, index):
             conexao.commit()
             id_aluno = cursor.lastrowid
             id_aluno_cache[nome_formatado] = id_aluno
-            print(f"✅ Aluno '{nome_formatado}' cadastrado no banco de dados com sucesso (ID: {id_aluno}).")
+            print(f"✅ Aluno(a) '{nome_formatado}' cadastrado(a) no banco de dados com sucesso (ID: {id_aluno}).")
         except Exception as e:
-            print(f"❌ Erro ao salvar aluno no banco de dados: {e}")
+            print(f"❌ Erro ao salvar aluno(a) no banco de dados: {e}")
             conexao.rollback()
             return
         finally:
