@@ -6,9 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const id = document.getElementById("alunoId").value;
     const nome = document.getElementById("alunoNome").value;
     const turno = document.getElementById("alunoTurno").value;
-    const turma = document.getElementById("alunoTurma").value;
 
-    const payload = { nome, turno, turma };
+    const ano = document.querySelector('input[name="ano"]:checked')?.value || "";
+    const turma = document.querySelector('input[name="turma"]:checked')?.value || "";
+
+ const turmaCompleta = `${ano} ${turma}`;
+
+ const payload = { nome, turno, turma: turmaCompleta };
 
     try {
       const res = await fetch(`/api/alunos${id ? "/" + id : ""}`, {
@@ -35,13 +39,33 @@ function abrirModal(aluno = null, modo = 'editar') {
   document.getElementById("alunoId").value = aluno?.id || "";
   document.getElementById("alunoNome").value = aluno?.nome || "";
   document.getElementById("alunoTurno").value = aluno?.turno || "integral";
-  document.getElementById("alunoTurma").value = aluno?.turma || "";
+   document.querySelectorAll('input[name="ano"]').forEach(radio => {
+    radio.checked = false;
+  });
+  document.querySelectorAll('input[name="turma"]').forEach(radio => {
+    radio.checked = false;
+  });
 
-  document.getElementById("alunoNome").disabled = (modo === 'visualizar');
+  if (aluno?.turma) {
+    const [ano, turma] = aluno.turma.split(" ");
+    const anoRadio = document.querySelector(`input[name="ano"][value="${ano}"]`);
+    const turmaRadio = document.querySelector(`input[name="turma"][value="${turma}"]`);
+
+    if (anoRadio) anoRadio.checked = true;
+    if (turmaRadio) turmaRadio.checked = true;
+  }
+
+  const isVisualizar = modo === 'visualizar';
+  document.getElementById("alunoNome").disabled = isVisualizar;
   document.getElementById("alunoTurno").disabled = true;
-  document.getElementById("alunoTurma").disabled = (modo === 'visualizar');
+  document.querySelectorAll('input[name="ano"]').forEach(radio => {
+    radio.disabled = isVisualizar;
+  });
+  document.querySelectorAll('input[name="turma"]').forEach(radio => {
+    radio.disabled = isVisualizar;
+  });
 
-  if (modo === 'visualizar') {
+  if (isVisualizar) {
     document.getElementById("btnSalvar").classList.add("hidden");
     document.getElementById("btnFechar").innerText = "Fechar";
   } else {

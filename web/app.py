@@ -173,19 +173,19 @@ def atualizar_embeddings():
         print(f"❌ Erro ao recarregar embeddings: {e}")
         return jsonify({"erro": "Erro ao recarregar embeddings."}), 500
 
-@app.route('/detalhes_aluno/<int:aluno_id>')
-def detalhes_aluno(aluno_id):
+@app.route('/detalhes_aluno/<int:id_aluno>')
+def detalhes_aluno(id_aluno):
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM alunos WHERE id = %s", (aluno_id,))
+        cursor.execute("SELECT * FROM alunos WHERE id = %s", (id_aluno,))
         aluno = cursor.fetchone()
 
         cursor.execute("""SELECT data_hora, tipo 
                           FROM registros_presenca 
-                          WHERE aluno_id = %s 
-                          ORDER BY data_hora DESC LIMIT 10""", (aluno_id,))
+                          WHERE id_aluno = %s 
+                          ORDER BY data_hora DESC LIMIT 10""", (id_aluno,))
         historico = cursor.fetchall()
 
         return jsonify({"aluno": aluno, "historico": historico})

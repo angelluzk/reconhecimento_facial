@@ -81,10 +81,37 @@
           </select>
         </div>
 
-        <div class="mb-4">
-          <label class="block mb-1 text-sm font-medium">Turma</label>
-          <input type="text" id="alunoTurma" class="w-full border rounded px-3 py-2" required />
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">Ano:</label>
+            <div class="space-y-2">
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="1º" required class="form-radio text-blue-600">
+                <span>1º Ano</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="2º" class="form-radio text-blue-600">
+                <span>2º Ano</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="3º" class="form-radio text-blue-600">
+                <span>3º Ano</span>
+              </label>
+            </div>
+          </div>
+        
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">Turma:</label>
+            <div class="grid grid-cols-3 gap-2">
+              {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+              <label class="flex items-center space-x-1">
+                <input type="radio" name="turma" value="{{ turma }}" required class="form-radio text-blue-600">
+                <span>{{ turma }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>      
 
         <div class="flex justify-end space-x-2">
           <button id="btnSalvar" type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
