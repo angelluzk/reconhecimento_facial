@@ -29,14 +29,14 @@ def nome_para_arquivo(nome):
     nome_sem_acentos = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
     return re.sub(r'\W+', '_', nome_sem_acentos).strip('_')
 
-def salvar_foto_no_disco(nome_arquivo, index, imagem_bytes):
+def salvar_foto_no_disco(id_aluno, nome_arquivo, index, imagem_bytes):
     try:
         imagem = Image.open(io.BytesIO(imagem_bytes)).convert("RGB")
 
         np_img = np.array(imagem)
         np_img_bgr = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
 
-        caminho_foto = os.path.join(FOTOS_DIR, f"{nome_arquivo}_{index}.jpg")
+        caminho_foto = os.path.join(FOTOS_DIR, f"{id_aluno}_{nome_arquivo}_{index}.jpg")
         print(f"[DEBUG] Salvando imagem em: {caminho_foto}")
 
         sucesso = cv2.imwrite(caminho_foto, np_img_bgr)
@@ -65,20 +65,19 @@ def processar_cadastro_web(nome, ano, turma_letra, turno, imagem_bytes, index):
         turno = 'integral'
 
     turma = f"{ano} {turma_letra}"
-
     nome_formatado = nome.strip().upper()
     nome_arquivo = nome_para_arquivo(nome_formatado)
 
-    caminho_foto, face_img = salvar_foto_no_disco(nome_arquivo, index, imagem_bytes)
-    embedding = gerar_embedding(face_img)
+    if not imagem_bytes:
+        print("⚠️ Nenhuma imagem recebida.")
+        return {"sucesso": False, "mensagem": "Imagem vazia recebida."}
 
     if index == 1:
-        caminho_relativo_foto = f"fotos_alunos/{os.path.basename(caminho_foto)}"
-
+        caminho_relativo_foto = ""
         conexao = get_db_connection()
         if not conexao:
             print("❌ Falha ao conectar ao banco de dados no cadastro.")
-            return
+            return {"sucesso": False, "mensagem": "Erro ao conectar ao banco de dados."}
 
         cursor = conexao.cursor()
         try:
@@ -89,20 +88,59 @@ def processar_cadastro_web(nome, ano, turma_letra, turno, imagem_bytes, index):
             conexao.commit()
             id_aluno = cursor.lastrowid
             id_aluno_cache[nome_formatado] = id_aluno
-            print(f"✅ Aluno(a) '{nome_formatado}' cadastrado(a) no banco de dados com sucesso (ID: {id_aluno}).")
+            print(f"✅ Aluno(a) '{nome_formatado}' cadastrado(a) com sucesso (ID: {id_aluno}).")
+
+            caminho_foto, face_img = salvar_foto_no_disco(id_aluno, nome_arquivo, index, imagem_bytes)
+            if caminho_foto:
+                caminho_relativo_foto = os.path.relpath(caminho_foto, FOTOS_DIR).replace("\\", "/")
+                cursor.execute("""
+                    UPDATE alunos
+                    SET foto = %s
+                    WHERE id = %s
+                """, (caminho_relativo_foto, id_aluno))
+                conexao.commit()
+                print(f"🖼️ Primeira foto registrada na tabela alunos: {caminho_relativo_foto}")
+            else:
+                print("⚠️ Não foi possível salvar a primeira foto no banco de dados.")
+
         except Exception as e:
-            print(f"❌ Erro ao salvar aluno(a) no banco de dados: {e}")
+            print(f"❌ Erro ao salvar aluno(a): {e}")
             conexao.rollback()
-            return
+            return {"sucesso": False, "mensagem": "Erro ao salvar aluno(a) no banco."}
         finally:
             cursor.close()
             conexao.close()
     else:
         id_aluno = id_aluno_cache.get(nome_formatado)
+        if not id_aluno:
+            print(f"❌ ID do aluno não encontrado no cache para {nome_formatado}.")
+            return {"sucesso": False, "mensagem": "ID do aluno não encontrado."}
 
-    if embedding is not None and id_aluno:
+    caminho_foto, face_img = salvar_foto_no_disco(id_aluno, nome_arquivo, index, imagem_bytes)
+    embedding = gerar_embedding(face_img)
+    if embedding is not None:
         caminho_embedding = os.path.join(EMBEDDINGS_DIR, f"{id_aluno}_{nome_arquivo}_{index}.npy")
         np.save(caminho_embedding, embedding)
         print(f"\U0001F4BE Embedding {index} salvo em {caminho_embedding}")
     else:
         print(f"⚠️ Embedding não gerado para imagem {index}")
+
+    if id_aluno and caminho_foto:
+        caminho_relativo_foto = os.path.relpath(caminho_foto, FOTOS_DIR).replace("\\", "/")
+        conexao = get_db_connection()
+        if conexao:
+            try:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO fotos_alunos (id_aluno, foto_nome)
+                        VALUES (%s, %s)
+                    """, (id_aluno, caminho_relativo_foto))
+                    conexao.commit()
+                    print(f"🖼️ Foto registrada no banco: {caminho_relativo_foto}")
+            except Exception as e:
+                print(f"❌ Erro ao salvar foto: {e}")
+                conexao.rollback()
+            finally:
+                conexao.close()
+
+    return {"sucesso": True, "mensagem": f"Imagem {index} processada com sucesso!"}

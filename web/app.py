@@ -4,31 +4,29 @@ import time
 import threading
 import webbrowser
 from datetime import datetime, date, timedelta
-
-from flask import Flask, render_template, Response, request, send_file, jsonify
+from flask import Flask, render_template, Response, request, jsonify, send_from_directory, send_file
 from flask_socketio import SocketIO
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from modulo1_reconhecimento.engine import carregar_face_model
-from modulo1_reconhecimento.relatorios import (
-    gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
-)
-from modulo1_reconhecimento.stream import (
-    gerar_frames, recarregar_embeddings, iniciar_camera, liberar_camera
-)
+from modulo1_reconhecimento.relatorios import gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
+from modulo1_reconhecimento.stream import gerar_frames, recarregar_embeddings, iniciar_camera, liberar_camera
 from modulo1_reconhecimento.cadastro import processar_cadastro_web
 from database.connection import get_db_connection
+from modulo1_reconhecimento.crud_alunos import listar_alunos, atualizar_aluno, excluir_aluno
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 webcam_ativa = False
-
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+FOTOS_ALUNOS_DIR = os.path.join(BASE_DIR, "modulo1_reconhecimento", "fotos_alunos")
 REQUIRED_DIRS = [
     "modulo1_reconhecimento/fotos_alunos",
     "modulo1_reconhecimento/embeddings_cache"
 ]
+
 for path in REQUIRED_DIRS:
     os.makedirs(path, exist_ok=True)
     print(f"📁 Verificado/criado: {path}")
@@ -57,7 +55,7 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     from modulo1_reconhecimento.stream import camera
-    if camera is not None and camera.isOpened():
+    if camera and camera.isOpened():
         return Response(gerar_frames(socketio), mimetype='multipart/x-mixed-replace; boundary=frame')
     return '', 204
 
@@ -77,7 +75,7 @@ def toggle_stream():
     except Exception as e:
         print(f"❌ Erro ao alternar webcam: {e}")
         return jsonify({'erro': 'Erro ao alternar webcam'}), 500
-    
+
 @app.route('/desligar_camera', methods=['POST'])
 def desligar_camera():
     global webcam_ativa
@@ -141,6 +139,10 @@ def baixar_relatorio(formato):
 def cadastro():
     return render_template('cadastro.html')
 
+@app.route('/alunos')
+def alunos():
+    return render_template('alunos.html')
+
 @app.route('/cadastrar_aluno', methods=['POST'])
 def cadastrar_aluno():
     try:
@@ -180,18 +182,48 @@ def detalhes_aluno(aluno_id):
         cursor.execute("SELECT * FROM alunos WHERE id = %s", (aluno_id,))
         aluno = cursor.fetchone()
 
-        cursor.execute("""
-            SELECT data_hora, tipo 
-            FROM registros_presenca 
-            WHERE aluno_id = %s 
-            ORDER BY data_hora DESC LIMIT 10
-        """, (aluno_id,))
+        cursor.execute("""SELECT data_hora, tipo 
+                          FROM registros_presenca 
+                          WHERE aluno_id = %s 
+                          ORDER BY data_hora DESC LIMIT 10""", (aluno_id,))
         historico = cursor.fetchall()
 
         return jsonify({"aluno": aluno, "historico": historico})
     except Exception as e:
         print(f"❌ Erro ao buscar detalhes do aluno(a): {e}")
         return jsonify({"erro": "Erro ao buscar dados"}), 500
+
+@app.route('/api/alunos', methods=['GET'])
+def get_alunos():
+    alunos = listar_alunos()
+    return jsonify(alunos)
+
+@app.route('/api/alunos/<int:id_aluno>', methods=['PUT'])
+def put_aluno(id_aluno):
+    nome = request.json['nome']
+    turno = request.json['turno']
+    turma = request.json['turma']
+    foto_path = request.json.get('foto', None)
+
+    resultado = atualizar_aluno(id_aluno, nome, turno, turma, foto_path)
+    return jsonify(resultado)
+
+@app.route('/api/alunos/<int:id_aluno>', methods=['DELETE'])
+def delete_aluno(id_aluno):
+    resultado = excluir_aluno(id_aluno)
+    return jsonify(resultado)
+
+@app.route('/fotos_alunos/<path:filename>')
+def servir_foto_aluno(filename):
+    try:
+        if os.path.exists(os.path.join(FOTOS_ALUNOS_DIR, filename)):
+            return send_from_directory(FOTOS_ALUNOS_DIR, filename)
+        else:
+            print(f"❌ Arquivo não encontrado: {filename}")
+            return "Arquivo não encontrado", 404
+    except Exception as e:
+        print(f"❌ Erro ao tentar servir foto: {e}")
+        return "Erro ao tentar servir foto", 500
 
 def abrir_navegador():
     time.sleep(2)

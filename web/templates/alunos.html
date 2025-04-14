@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerenciar Alunos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+  <script defer src="{{ url_for('static', filename='js/alunos.js') }}"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+  <header class="bg-blue-600 text-white py-4 shadow">
+    <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <h1 class="text-xl md:text-2xl font-semibold text-center sm:text-left">Gerenciamento de Alunos</h1>
+      <div class="flex gap-2">
+        <a href="{{ url_for('index') }}"
+          class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+          <i class="fas fa-home mr-2"></i>Início
+        </a>
+        <a href="{{ url_for('relatorios') }}"
+          class="bg-purple-600 text-white px-4 py-2 rounded-md shadow hover:bg-purple-700 transition text-sm font-medium">
+          <i class="fas fa-chart-bar mr-2"></i>Relatórios de Presença
+        </a>
+        <a href="{{ url_for('cadastro') }}"
+          class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition text-sm font-medium">
+          <i class="fas fa-user-plus mr-2"></i>Cadastrar novo Aluno(a)
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800">Lista de Alunos</h2>
+    </div>    
+
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+      <table class="min-w-full text-left text-sm">
+        <thead class="bg-gray-200 text-gray-600 uppercase text-xs">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Nome</th>
+            <th class="px-4 py-2">Turno</th>
+            <th class="px-4 py-2">Turma</th>
+            <th class="px-4 py-2">Foto</th>
+            <th class="px-4 py-2">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaAlunos" class="text-gray-700">
+        </tbody>
+      </table>
+    </div>
+
+    <div id="pagination" class="flex justify-center mt-4">
+    </div>
+  </main>
+  </div>
+
+  <div id="modalAluno" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <h3 class="text-xl font-semibold mb-4" id="modalTitulo">Editar Aluno(a)</h3>
+      <form id="formAluno">
+        <input type="hidden" id="alunoId" />
+        
+        <div class="mb-4">
+          <label class="block mb-1 text-sm font-medium">Nome</label>
+          <input type="text" id="alunoNome" class="w-full border rounded px-3 py-2" required />
+        </div>
+
+        <div id="campoTurno" class="mb-4">
+          <label class="block mb-1 text-sm font-medium">Turno</label>
+          <select id="alunoTurno" class="w-full border rounded px-3 py-2" disabled>
+            <option value="manhã">Manhã</option>
+            <option value="tarde">Tarde</option>
+            <option value="integral">Integral</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="block mb-1 text-sm font-medium">Turma</label>
+          <input type="text" id="alunoTurma" class="w-full border rounded px-3 py-2" required />
+        </div>
+
+        <div class="flex justify-end space-x-2">
+          <button id="btnSalvar" type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+          <button id="btnFechar" type="button" onclick="fecharModal()" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Fechar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

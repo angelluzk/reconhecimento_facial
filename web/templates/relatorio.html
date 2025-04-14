@@ -6,16 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Relatório de Presença</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/a2f5d0d4f1.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen p-6">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
-  <div class="max-w-7xl mx-auto">
-    <a href="{{ url_for('index') }}"
-      class="inline-flex items-center bg-white border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold px-5 py-2 rounded-lg shadow transition mb-6">
-      <i class="fas fa-arrow-left mr-2"></i>Voltar para a Tela Inicial
-    </a>
+  <header class="bg-blue-600 text-white py-4 shadow">
+    <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <h1 class="text-xl md:text-2xl font-semibold text-center sm:text-left">Gerenciar Registro de Entrada e Saída</h1>
+      <div class="flex gap-2">
+        <a href="{{ url_for('index') }}"
+        class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+        <i class="fas fa-home mr-2"></i>Início
+        </a>
+        <a href="{{ url_for('alunos') }}"
+          class="bg-yellow-500 text-white px-4 py-2 rounded-md shadow hover:bg-yellow-600 transition text-sm font-medium">
+          <i class="fas fa-users mr-2"></i>Gerenciar Alunos
+        </a>
+        <a href="{{ url_for('cadastro') }}" class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition text-sm font-medium">
+          <i class="fas fa-user-plus mr-2"></i>Cadastrar Alunos
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto flex-1 p-6">
 
     <h2 class="text-3xl font-bold text-center mb-8 text-blue-700">
       <i class="fas fa-clipboard-list mr-2"></i>Relatório de Presença
@@ -37,7 +53,7 @@
             class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
         </div>
 
-        <div>
+        <!--<div>
           <label class="font-semibold block mb-1">Turno:</label>
           <select name="turno" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
             <option value="">Todos</option>
@@ -45,7 +61,7 @@
             <option value="Tarde" {% if request.args.get('turno')=='Tarde' %}selected{% endif %}>Tarde</option>
             <option value="Integral" {% if request.args.get('turno')=='Integral' %}selected{% endif %}>Integral</option>
           </select>
-        </div>
+        </div>-->
 
         <div>
           <label class="font-semibold block mb-1">Turma:</label>
@@ -142,23 +158,9 @@
     {% endif %}
   </div>
 
-  <div id="modal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
-    <div class="bg-white p-6 rounded-xl shadow-xl max-w-md w-full text-center">
-      <h3 class="text-xl font-bold mb-4 text-blue-700">Detalhes da Presença</h3>
-      <div class="text-gray-700 space-y-2">
-        <p><strong>Aluno:</strong> <span id="modalAluno"></span></p>
-        <p><strong>Turma:</strong> <span id="modalTurma"></span></p>
-        <p><strong>Turno:</strong> <span id="modalTurno"></span></p>
-        <p><strong>Data:</strong> <span id="modalData"></span></p>
-        <p><strong>Entrada:</strong> <span id="modalEntrada"></span></p>
-        <p><strong>Saída:</strong> <span id="modalSaida"></span></p>
-        <p><strong>Duração:</strong> <span id="modalDuracao"></span></p>
-      </div>
-      <button onclick="fecharModal()" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow">
-        Fechar
-      </button>
-    </div>
-  </div>
+  <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">
+    &copy; <span id="anoAtual">2025</span> Sistema Escolar com Reconhecimento Facial
+  </footer>
 
   <script src="{{ url_for('static', filename='js/relatorio.js') }}"></script>
 
