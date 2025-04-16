@@ -63,7 +63,7 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ---
 
-## 💻 REQUISITOS DE SISTEMA
+## 💻 Requisitos do Sistema
 
 | **🔸 MÍNIMOS** | **🔹 RECOMENDADOS** |
 |---------------|----------------------|
