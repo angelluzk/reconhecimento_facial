@@ -63,28 +63,17 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ---
 
-## 🖥️ Requisitos Ideais para o Computador
+## 💻 REQUISITOS DE SISTEMA
 
-> **Sistema Operacional:**
-> - Windows 10 ou superior
-
-> **Processador:**
-> - Intel Core i5 de 9ª geração ou superior
-> - AMD Ryzen 5 3600 ou superior
-
-> **Memória RAM:**
-> - 8 GB ou 16 GB
-
-> **Armazenamento:**
-> - 256 GB SSD ou superior
-
-> **Placa de Vídeo:**
-> - Gráficos Integrados Intel UHD (em processadores mais recentes, como o Intel Core i5/i7 de 8ª ou 9ª geração)
-> - Ou uma placa gráfica dedicada NVIDIA GTX 1050 (se preferir maior desempenho gráfico, mas não é essencial).
-
-> **Webcam:**
-> - Resolução mínima de 720p (HD)
-> - 30 FPS ou superior
+| **🔸 MÍNIMOS** | **🔹 RECOMENDADOS** |
+|---------------|----------------------|
+| Requer sistema e processador de 64 bits | Requer sistema e processador de 64 bits |
+| **SO:** Windows 10 / Ubuntu 20.04 / macOS 10.15 | **SO:** Windows 10 ou 11 / Ubuntu 22.04 / macOS 12 |
+| **Processador:** Intel Core i5-8250U / AMD Ryzen 5 2500U | **Processador:** Intel Core i5 de 9ª geração / AMD Ryzen 5 3600 |
+| **Memória:** 8 GB de RAM | **Memória:** 16 GB de RAM |
+| **Placa de vídeo:** Gráficos integrados Intel UHD 620 ou superior | **Placa de vídeo:** NVIDIA GTX 1050 ou superior (opcional, para CUDA) |
+| **Armazenamento:** 256 GB SSD | **Armazenamento:** 512 GB SSD |
+| **Webcam:** 720p (HD), 30 FPS | **Webcam:** 1080p (Full HD), 30 FPS ou superior |
 
 ## 📌 Requisitos de Instalação
 
