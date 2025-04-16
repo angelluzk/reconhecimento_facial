@@ -9,12 +9,15 @@ import re
 
 try:
     import torch
-    ctx_id = 0 if torch.cuda.is_available() else -1
+    if hasattr(torch, 'cuda') and torch.cuda.is_available():
+        device = 0
+    else:
+        device = -1
 except ImportError:
-    ctx_id = -1
+    device = -1
 
 face_app = FaceAnalysis(name='buffalo_l')
-face_app.prepare(ctx_id=ctx_id)
+face_app.prepare(ctx_id=device)
 
 TEMPO_ESPERA_MINUTOS = 10
 

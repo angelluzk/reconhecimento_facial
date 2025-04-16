@@ -63,6 +63,30 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ---
 
+## 🖥️ Requisitos Ideais para o Computador
+
+**Sistema Operacional:**
+- Windows 10 ou superior
+
+**Processador:**
+- Intel Core i5 de 9ª geração ou superior
+- AMD Ryzen 5 3600 ou superior
+
+**Memória RAM:**
+- 8 GB ou 16 GB
+
+**Armazenamento:**
+- 256 GB SSD ou superior
+
+**Placa de Vídeo:**
+- Gráficos Integrados Intel UHD (em processadores mais recentes, como o Intel Core i5/i7 de 8ª ou 9ª geração)
+
+- Ou uma placa gráfica dedicada NVIDIA GTX 1050 (se preferir maior desempenho gráfico, mas não é essencial).
+
+**Webcam:**
+- Resolução mínima de 720p (HD)
+- 30 FPS ou superior
+
 ## 📌 Requisitos de Instalação
 
 Antes de iniciar o sistema, siga os passos abaixo para configurar o ambiente corretamente:
@@ -177,6 +201,12 @@ CREATE TABLE alunos (
     turma VARCHAR(10) NOT NULL
 );
 
+CREATE TABLE `fotos_alunos` (
+  `id_foto` int(11) NOT NULL,
+  `id_aluno` int(11) NOT NULL,
+  `foto_nome` varchar(255) NOT NULL
+);
+
 CREATE TABLE registros_presenca (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_aluno INT,
@@ -210,7 +240,8 @@ DB_NAME=reconhecimento_facial
 │   └── reconhecimento_facil.sql    
 ├── 📂 modulo1_reconhecimento  
 │   ├── __init__.py 
-│   ├── cadastro.py         
+│   ├── cadastro.py  
+│   ├── crud_alunos.py        
 │   ├── engine.py            
 │   ├── stream.py            
 │   ├── relatorios.py        
@@ -222,10 +253,12 @@ DB_NAME=reconhecimento_facial
 │   │   │     ├── cadastro.css
 │   │   │     ├── index.css
 │   │   ├── 📂 js/ 
+│   │   │     ├── alunos.js
 │   │   │     ├── cadastro.js
 │   │   │     ├── index.js
 │   │   │     ├── relatorio.js
 │   ├── 📂 templates/
+│   │   ├── alunos.html
 │   │   ├── cadastro.html
 │   │   ├── index.html       
 │   │   └── relatorio.html   
@@ -260,8 +293,6 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 
 ## 📌 Observações
 
-- As imagens dos alunos devem estar na pasta `fotos_alunos/`
-- O nome da imagem deve ser igual ao nome do aluno cadastrado.
 - Suporta nomes com espaços e acentos.
 - Utiliza embeddings em cache para acelerar o reconhecimento.
 - Entradas e saídas são diferenciadas com base no último registro.
