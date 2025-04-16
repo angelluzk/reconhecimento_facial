@@ -19,7 +19,25 @@ except ImportError:
 face_app = FaceAnalysis(name='buffalo_l')
 face_app.prepare(ctx_id=device)
 
-TEMPO_ESPERA_MINUTOS = 10
+def obter_tempo_espera():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT valor, tipo FROM configuracoes WHERE nome_configuracao = 'tempo_espera'")
+        resultado = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if resultado:
+            valor = int(resultado['valor'])
+            tipo = resultado['tipo']
+            if tipo == 'horas':
+                return valor * 60
+            elif tipo == 'minutos':
+                return valor
+        return 10
+    except Exception as e:
+        print(f"[ERRO] Erro ao buscar tempo de espera: {e}")
+        return 10
 
 def nome_para_arquivo(nome):
     nome_sem_acentos = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
@@ -137,12 +155,14 @@ def registrar_ocorrencia(nome_aluno):
 
     ultimo_registro = cursor.fetchone()
 
+    tempo_espera_minutos = obter_tempo_espera()
+
     if ultimo_registro:
         tempo_ultimo = ultimo_registro['data_hora']
-        if tempo_ultimo > (agora - timedelta(minutes=TEMPO_ESPERA_MINUTOS)):
+        if tempo_ultimo > (agora - timedelta(minutes=tempo_espera_minutos)):
             cursor.close()
             conn.close()
-            return None, "⏳ Registro ignorado (último registro há menos de 10 minutos)."
+            return None, f"⏳ Registro ignorado (último registro há menos de {tempo_espera_minutos} minutos)."
 
     tipo_registro = "entrada" if not ultimo_registro or ultimo_registro['tipo_registro'] == "saida" else "saida"
 

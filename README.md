@@ -181,28 +181,38 @@ CREATE DATABASE reconhecimento_facial;
 
 USE reconhecimento_facial;
 
-CREATE TABLE alunos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    foto VARCHAR(255) NOT NULL,
-    turno ENUM('manhã', 'tarde', 'integral') NOT NULL DEFAULT 'integral',
-    turma VARCHAR(10) NOT NULL
-);
+CREATE TABLE `alunos` (
+  `id` int(11) NOT NULL,
+  `nome` varchar(255) NOT NULL,
+  `foto` varchar(255) NOT NULL,
+  `turno` enum('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
+  `turma` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `configuracoes` (
+  `id` int(11) NOT NULL,
+  `nome_configuracao` varchar(255) NOT NULL,
+  `valor` int(11) NOT NULL,
+  `tipo` enum('minutos','horas') NOT NULL DEFAULT 'minutos',
+  `descricao` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `configuracoes` (`id`, `nome_configuracao`, `valor`, `tipo`, `descricao`) VALUES
+(1, 'tempo_espera', 3, 'minutos', 'Tempo de espera entre registros de entrada e saída');
 
 CREATE TABLE `fotos_alunos` (
   `id_foto` int(11) NOT NULL,
   `id_aluno` int(11) NOT NULL,
   `foto_nome` varchar(255) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE registros_presenca (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_aluno INT,
-    tipo_registro ENUM('entrada', 'saida'),
-    data_hora TIMESTAMP NOT NULL DEFAULT current_timestamp(),
-    turma VARCHAR(10) NOT NULL,
-    FOREIGN KEY (id_aluno) REFERENCES alunos(id)
-);
+CREATE TABLE `registros_presenca` (
+  `id` int(11) NOT NULL,
+  `id_aluno` int(11) DEFAULT NULL,
+  `tipo_registro` enum('entrada','saida') NOT NULL,
+  `data_hora` timestamp NOT NULL DEFAULT current_timestamp(),
+  `turma` varchar(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 ---
 
@@ -229,6 +239,7 @@ DB_NAME=reconhecimento_facial
 ├── 📂 modulo1_reconhecimento  
 │   ├── __init__.py 
 │   ├── cadastro.py  
+│   ├── controle_tempo.py 
 │   ├── crud_alunos.py        
 │   ├── engine.py            
 │   ├── stream.py            

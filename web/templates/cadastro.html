@@ -119,6 +119,7 @@
           </div>
 
           <div id="preview-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"></div>
+
           <p id="status" class="text-center text-sm text-gray-500 mt-4 italic"></p>
         </div>
       </form>
@@ -126,8 +127,10 @@
   </main>
 
   <div id="successModal" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm text-center space-y-4">
-      <button id="fecharModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" aria-label="Fechar modal">
+    <div id="modalContent"
+      class="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-sm text-center space-y-4 transform transition-transform scale-95">
+      <button id="fecharModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+        aria-label="Fechar modal">
         <i class="fa-solid fa-times"></i>
       </button>
       <h2 class="text-2xl font-bold text-green-600"><i class="fa-solid fa-check-circle"></i> Cadastro Concluído</h2>

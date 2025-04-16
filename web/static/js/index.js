@@ -2,6 +2,12 @@ const socket = io.connect("http://127.0.0.1:5000");
 const botaoWebcam = document.getElementById("botao-webcam");
 const video = document.getElementById("video-stream");
 const botaoTrocarCamera = document.getElementById("trocar-camera");
+const modal = document.getElementById('modal-tempo');
+const btnAbrir = document.getElementById('abrir-modal-tempo');
+const btnCancelar = document.getElementById('btn-cancelar-tempo');
+const form = document.getElementById('form-tempo');
+const inputValor = document.getElementById('valor-tempo');
+const selectTipo = document.getElementById('tipo-tempo');
 let webcamAtiva = false;
 let bloqueado = false;
 let cameraIndex = 0;
@@ -101,3 +107,47 @@ function aplicarFiltro() {
 }
 
 document.getElementById("anoAtual").textContent = new Date().getFullYear();
+
+ btnAbrir.addEventListener('click', async () => {
+  try {
+    const response = await fetch('/api/tempo-espera');
+    const data = await response.json();
+    inputValor.value = data.valor;
+    selectTipo.value = data.tipo;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } catch (error) {
+    console.error('Erro ao buscar tempo:', error);
+    alert('Erro ao carregar configuração de tempo.');
+  }
+});
+
+btnCancelar.addEventListener('click', () => {
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const valor = parseInt(inputValor.value);
+  const tipo = selectTipo.value;
+
+  try {
+    const response = await fetch('/api/tempo-espera', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ valor, tipo })
+    });
+
+    if (response.ok) {
+      alert('Tempo atualizado com sucesso!');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    } else {
+      alert('Erro ao atualizar tempo.');
+    }
+  } catch (error) {
+    console.error('Erro ao salvar tempo:', error);
+    alert('Erro ao atualizar configuração.');
+  }
+});

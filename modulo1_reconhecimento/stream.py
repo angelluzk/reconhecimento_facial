@@ -4,13 +4,12 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 import time
 
-from .engine import get_rostos, registrar_ocorrencia, cosine_similarity, face_app
+from .engine import get_rostos, registrar_ocorrencia, cosine_similarity, face_app, obter_tempo_espera
 
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 FPS = 10
 SIMILARITY_THRESHOLD = 0.5
-TEMPO_ESPERA_MINUTOS = 10
 
 camera = None
 camera_index = 0
@@ -111,8 +110,10 @@ def gerar_frames(socketio):
                 texto_exibicao = f"{nome} ({turma})"
                 cor = (0, 255, 0)
 
-                if nome in tempo_ultima_ocorrencia and (agora - tempo_ultima_ocorrencia[nome]) < timedelta(minutes=TEMPO_ESPERA_MINUTOS):
-                    mensagem = f"⏳ {texto_exibicao} já registrado recentemente! Ignorado..."
+                tempo_espera = obter_tempo_espera()
+
+                if nome in tempo_ultima_ocorrencia and (agora - tempo_ultima_ocorrencia[nome]) < timedelta(minutes=tempo_espera):
+                    mensagem = f"⏳ {texto_exibicao} já registrado(a) recentemente! Ignorado..."
                     tipo = "info"
                 else:
                     nome_padronizado = nome.strip().upper()

@@ -16,6 +16,8 @@ from modulo1_reconhecimento.cadastro import processar_cadastro_web
 from database.connection import get_db_connection
 from modulo1_reconhecimento.crud_alunos import listar_alunos, atualizar_aluno, excluir_aluno
 
+from modulo1_reconhecimento.controle_tempo import obter_configuracao_tempo, atualizar_configuracao_tempo
+
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
@@ -58,6 +60,23 @@ def video_feed():
     if camera and camera.isOpened():
         return Response(gerar_frames(socketio), mimetype='multipart/x-mixed-replace; boundary=frame')
     return '', 204
+
+@app.route('/api/tempo-espera', methods=['GET'])
+def get_tempo_espera():
+    config = obter_configuracao_tempo()
+    if config:
+        return jsonify({"valor": int(config["valor"]), "tipo": config["tipo"]})
+    return jsonify({"error": "Configuração não encontrada"}), 404
+
+@app.route('/api/tempo-espera', methods=['POST'])
+def set_tempo_espera():
+    data = request.get_json()
+    valor = data.get("valor")
+    tipo = data.get("tipo")
+    if valor and tipo in ["minutos", "horas"]:
+        atualizar_configuracao_tempo(valor, tipo)
+        return jsonify({"message": "Configuração atualizada com sucesso"})
+    return jsonify({"error": "Dados inválidos"}), 400
 
 @app.route('/toggle_stream', methods=['POST'])
 def toggle_stream():
