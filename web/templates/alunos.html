@@ -5,15 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerenciar Alunos</title>
+  <!-- Tailwind CSS para estilização moderna. -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Ícones Font Awesome. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Socket.IO (presente para possível integração em tempo real, embora não usado diretamente aqui). -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-
+  <!-- Script JS específico da página de alunos. -->
   <script defer src="{{ url_for('static', filename='js/alunos.js') }}"></script>
 </head>
 
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
-
+  <!-- Cabeçalho com título e botões de navegação. -->
   <header class="bg-blue-600 text-white py-4 shadow">
     <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
       <h1 class="text-xl md:text-2xl font-semibold text-center sm:text-left">Gerenciamento de Alunos</h1>
@@ -37,8 +40,9 @@
   <main class="flex-1 p-8">
     <div class="mb-6">
       <h2 class="text-2xl font-semibold text-gray-800">Lista de Alunos</h2>
-    </div>    
+    </div>
 
+    <!-- Tabela que exibe os alunos cadastrados. -->
     <div class="overflow-x-auto bg-white rounded-lg shadow">
       <table class="min-w-full text-left text-sm">
         <thead class="bg-gray-200 text-gray-600 uppercase text-xs">
@@ -51,22 +55,26 @@
             <th class="px-4 py-2">Ações</th>
           </tr>
         </thead>
+        <!-- O corpo da tabela será preenchido dinamicamente via JS. -->
         <tbody id="tabelaAlunos" class="text-gray-700">
         </tbody>
       </table>
     </div>
 
+    <!-- Paginação da tabela (JS preenche isso também). -->
     <div id="pagination" class="flex justify-center mt-4">
     </div>
   </main>
   </div>
 
+
+  <!-- Modal para editar dados do aluno(a). -->
   <div id="modalAluno" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
       <h3 class="text-xl font-semibold mb-4" id="modalTitulo">Editar Aluno(a)</h3>
       <form id="formAluno">
         <input type="hidden" id="alunoId" />
-        
+
         <div class="mb-4">
           <label class="block mb-1 text-sm font-medium">Nome</label>
           <input type="text" id="alunoNome" class="w-full border rounded px-3 py-2" required />
@@ -99,7 +107,7 @@
               </label>
             </div>
           </div>
-        
+
           <div>
             <label class="block text-gray-700 font-medium mb-2">Turma:</label>
             <div class="grid grid-cols-3 gap-2">
@@ -111,15 +119,27 @@
               {% endfor %}
             </div>
           </div>
-        </div>      
+        </div>
 
         <div class="flex justify-end space-x-2">
-          <button id="btnSalvar" type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
-          <button id="btnFechar" type="button" onclick="fecharModal()" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Fechar</button>
+          <button id="btnSalvar" type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+          <button id="btnFechar" type="button" onclick="fecharModal()"
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Fechar</button>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- Toast para mensagens de sucesso (ex: aluno(a) salvo, excluído etc.). -->
+  <div id="toast"
+  class="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+  <div
+    class="bg-green-500 text-white px-6 py-3 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-auto"
+    id="toastContent">
+  </div>
+</div>
+
 </body>
 
 </html>

@@ -1,20 +1,25 @@
+// Espera o carregamento completo do DOM para executar as funções.
 document.addEventListener("DOMContentLoaded", () => {
-  carregarAlunos();
+  carregarAlunos(); // Carrega todos os alunos ao abrir a página.
 
+  // Adiciona evento de envio do formulário do aluno (criar ou editar).
   document.getElementById("formAluno").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Evita o recarregamento da página ao enviar o form.
+
+    // Captura os dados dos campos.
     const id = document.getElementById("alunoId").value;
     const nome = document.getElementById("alunoNome").value;
     const turno = document.getElementById("alunoTurno").value;
 
+    // Recupera os valores selecionados de ano e turma.
     const ano = document.querySelector('input[name="ano"]:checked')?.value || "";
     const turma = document.querySelector('input[name="turma"]:checked')?.value || "";
 
- const turmaCompleta = `${ano} ${turma}`;
-
- const payload = { nome, turno, turma: turmaCompleta };
+    const turmaCompleta = `${ano} ${turma}`; // Junta os valores (ex: "1º A").
+    const payload = { nome, turno, turma: turmaCompleta }; // Dados a serem enviados.
 
     try {
+      // Envia requisição POST (novo) ou PUT (edição) para a API.
       const res = await fetch(`/api/alunos${id ? "/" + id : ""}`, {
         method: id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,72 +28,83 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.ok) {
         fecharModal();
         carregarAlunos();
-        alert("Aluno(a) salvo com sucesso!");
+        mostrarToast("Aluno(a) salvo com sucesso!");
       } else {
-        alert("Erro ao salvar aluno(a).");
+        mostrarToast("Erro ao salvar aluno(a).", "erro");
       }
     } catch (err) {
       console.error("Erro ao salvar aluno(a):", err);
-      alert("Erro ao salvar aluno(a). Tente novamente!");
+      mostrarToast("Erro ao salvar aluno(a). Tente novamente!", "erro");
     }
   });
 });
 
-function abrirModal(aluno = null, modo = 'editar') {
-  document.getElementById("modalTitulo").innerText = modo === 'visualizar' ? "Visualizar Aluno" : modo === 'editar' ? "Editar Aluno" : "Novo Aluno";
+// Função para abrir o modal com dados preenchidos (editar ou visualizar).
+function abrirModal(aluno = null, modo = "editar") {
+  // Define o título do modal de acordo com o modo.
+  document.getElementById("modalTitulo").innerText =
+    modo === "visualizar" ? "Visualizar Aluno" : modo === "editar" ? "Editar Aluno" : "Novo Aluno";
+
+  // Preenche os campos com os dados do aluno(a) ou deixa vazio.
   document.getElementById("alunoId").value = aluno?.id || "";
   document.getElementById("alunoNome").value = aluno?.nome || "";
   document.getElementById("alunoTurno").value = aluno?.turno || "integral";
-   document.querySelectorAll('input[name="ano"]').forEach(radio => {
-    radio.checked = false;
-  });
-  document.querySelectorAll('input[name="turma"]').forEach(radio => {
-    radio.checked = false;
-  });
 
+  // Desmarca todas as opções de ano e turma antes de marcar as corretas.
+  document.querySelectorAll('input[name="ano"]').forEach((radio) => (radio.checked = false));
+  document.querySelectorAll('input[name="turma"]').forEach((radio) => (radio.checked = false));
+
+  // Se o aluno(a) tiver turma, separa ano e turma e marca os rádios correspondentes.
   if (aluno?.turma) {
     const [ano, turma] = aluno.turma.split(" ");
     const anoRadio = document.querySelector(`input[name="ano"][value="${ano}"]`);
     const turmaRadio = document.querySelector(`input[name="turma"][value="${turma}"]`);
-
     if (anoRadio) anoRadio.checked = true;
     if (turmaRadio) turmaRadio.checked = true;
   }
 
-  const isVisualizar = modo === 'visualizar';
+  // Se for modo "visualizar", desativa os campos.
+  const isVisualizar = modo === "visualizar";
   document.getElementById("alunoNome").disabled = isVisualizar;
   document.getElementById("alunoTurno").disabled = true;
-  document.querySelectorAll('input[name="ano"]').forEach(radio => {
-    radio.disabled = isVisualizar;
-  });
-  document.querySelectorAll('input[name="turma"]').forEach(radio => {
-    radio.disabled = isVisualizar;
-  });
+  document.querySelectorAll('input[name="ano"]').forEach((radio) => (radio.disabled = isVisualizar));
+  document.querySelectorAll('input[name="turma"]').forEach((radio) => (radio.disabled = isVisualizar));
 
-  if (isVisualizar) {
-    document.getElementById("btnSalvar").classList.add("hidden");
-    document.getElementById("btnFechar").innerText = "Fechar";
-  } else {
-    document.getElementById("btnSalvar").classList.remove("hidden");
-    document.getElementById("btnFechar").innerText = "Cancelar";
-  }
-
+  // Mostra ou oculta o botão de salvar, dependendo do modo (visualiar ou editar).
+  document.getElementById("btnSalvar").classList.toggle("hidden", isVisualizar);
+  document.getElementById("btnFechar").innerText = isVisualizar ? "Fechar" : "Cancelar";
   document.getElementById("modalAluno").classList.remove("hidden");
 }
 
+// Função para fechar o modal.
 function fecharModal() {
   document.getElementById("modalAluno").classList.add("hidden");
 }
 
+// Função para carregar os alunos da API e exibir na tabela.
 async function carregarAlunos() {
+  const tbody = document.getElementById("tabelaAlunos");
+  // Mostra uma animação de carregamento enquanto os dados são buscados.
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" class="text-center py-4">
+        <div class="flex justify-center items-center space-x-2">
+          <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+          <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.1s]"></div>
+          <div class="w-4 h-4 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+          <span class="ml-3 text-blue-500">Carregando alunos...</span>
+        </div>
+      </td>
+    </tr>`;
+
   try {
     const res = await fetch("/api/alunos");
     const alunos = await res.json();
 
-    const tbody = document.getElementById("tabelaAlunos");
     tbody.innerHTML = "";
 
-    alunos.forEach(aluno => {
+    // Adiciona cada aluno(a) como uma linha na tabela.
+    alunos.forEach((aluno) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="px-4 py-2">${aluno.id}</td>
@@ -96,8 +112,7 @@ async function carregarAlunos() {
         <td class="px-4 py-2">${aluno.turno}</td>
         <td class="px-4 py-2">${aluno.turma}</td>
         <td class="px-4 py-2">
-        <img src="/fotos_alunos/${aluno.foto}" alt="Foto" class="w-10 h-10 rounded-full object-cover" />
-
+          <img src="/fotos_alunos/${aluno.foto}" alt="Foto" class="w-10 h-10 rounded-full object-cover" />
         </td>
         <td class="px-4 py-2">
           <button onclick='abrirModal(${JSON.stringify(aluno)}, "editar")' class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i> Alterar</button>
@@ -109,22 +124,38 @@ async function carregarAlunos() {
     });
   } catch (err) {
     console.error("Erro ao carregar alunos:", err);
-    alert("Erro ao carregar alunos. Tente novamente!");
+    mostrarToast("Erro ao carregar alunos. Tente novamente!", "erro");
   }
 }
 
+// Função para deletar aluno(a) após confirmação.
 async function deletarAluno(id) {
   if (!confirm("Deseja realmente deletar este aluno(a)?")) return;
   try {
     const res = await fetch(`/api/alunos/${id}`, { method: "DELETE" });
     if (res.ok) {
-      carregarAlunos();
-      alert("Aluno(a) excluído com sucesso!");
+      carregarAlunos(); // Atualiza a lista.
+      mostrarToast("Aluno(a) excluído com sucesso!");
     } else {
-      alert("Erro ao excluir aluno(a).");
+      mostrarToast("Erro ao excluir aluno(a).", "erro");
     }
   } catch (err) {
     console.error("Erro ao deletar aluno(a):", err);
-    alert("Erro ao excluir aluno(a). Tente novamente!");
+    mostrarToast("Erro ao excluir aluno(a). Tente novamente!", "erro");
   }
+}
+
+// Função de alerta (tipo toast) no centro da tela.
+function mostrarToast(mensagem) {
+  const toast = document.getElementById("toast");
+  const content = document.getElementById("toastContent");
+
+  content.textContent = mensagem;
+  content.classList.remove("opacity-0");
+  content.classList.add("opacity-100");
+
+  setTimeout(() => {
+    content.classList.remove("opacity-100");
+    content.classList.add("opacity-0");
+  }, 3000);
 }
