@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 
 from .engine import get_rostos, registrar_ocorrencia, cosine_similarity, face_app, obter_tempo_espera
+from .crud_alunos import obter_dados_aluno_com_cache
 
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
@@ -104,9 +105,12 @@ def gerar_frames(socketio):
             melhor_sim = similaridades[melhor_id] if melhor_id != -1 else 0
 
             if melhor_sim > SIMILARITY_THRESHOLD:
-                info = infos_dos_rostos[melhor_id]
-                nome = info["nome"]
-                turma = info["turma"]
+                info_base = infos_dos_rostos[melhor_id]
+                nome_padronizado = info_base["nome"].strip().upper()
+
+                dados = obter_dados_aluno_com_cache(nome_padronizado)
+                nome = dados["nome"]
+                turma = dados["turma"]
                 texto_exibicao = f"{nome} ({turma})"
                 cor = (0, 255, 0)
 
