@@ -17,15 +17,16 @@
       <h1 class="text-xl md:text-2xl font-semibold text-center sm:text-left">Gerenciar Registro de Entrada e Saída</h1>
       <div class="flex gap-2">
         <a href="{{ url_for('index') }}"
-        class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
-        <i class="fas fa-home mr-2"></i>Início
+          class="bg-white text-blue-600 px-4 py-2 rounded-md shadow hover:bg-gray-100 transition text-sm font-medium">
+          <i class="fas fa-home mr-2"></i>Início
         </a>
         <a href="{{ url_for('alunos') }}"
           class="bg-yellow-500 text-white px-4 py-2 rounded-md shadow hover:bg-yellow-600 transition text-sm font-medium">
           <i class="fas fa-users mr-2"></i>Gerenciar Alunos
         </a>
-        <a href="{{ url_for('cadastro') }}" class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition text-sm font-medium">
-          <i class="fas fa-user-plus mr-2"></i>Cadastrar Alunos
+        <a href="{{ url_for('cadastro') }}"
+          class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition text-sm font-medium">
+          <i class="fas fa-user-plus mr-2"></i>Cadastrar novo Aluno(a)
         </a>
       </div>
     </div>
@@ -38,7 +39,8 @@
     </h2>
 
     <form method="get" class="bg-white p-6 rounded-xl shadow-md space-y-6">
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="font-semibold block mb-1">Data Início:</label>
           <input type="date" name="data_inicio" value="{{ request.args.get('data_inicio', '') }}"
@@ -52,34 +54,43 @@
             placeholder="Selecione a data"
             class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
         </div>
+      </div>
 
-        <!--<div>
-          <label class="font-semibold block mb-1">Turno:</label>
-          <select name="turno" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
-            <option value="">Todos</option>
-            <option value="Manhã" {% if request.args.get('turno')=='Manhã' %}selected{% endif %}>Manhã</option>
-            <option value="Tarde" {% if request.args.get('turno')=='Tarde' %}selected{% endif %}>Tarde</option>
-            <option value="Integral" {% if request.args.get('turno')=='Integral' %}selected{% endif %}>Integral</option>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="font-semibold block mb-1">Ano:</label>
+          <select name="ano" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+            <option value="">Selecione o Ano</option>
+            <option value="1º" {% if request.args.get('ano')=='1º' %}selected{% endif %}>1º Ano</option>
+            <option value="2º" {% if request.args.get('ano')=='2º' %}selected{% endif %}>2º Ano</option>
+            <option value="3º" {% if request.args.get('ano')=='3º' %}selected{% endif %}>3º Ano</option>
           </select>
-        </div>-->
+        </div>
 
         <div>
           <label class="font-semibold block mb-1">Turma:</label>
-          <input type="text" name="turma" placeholder="Ex: 1º B" value="{{ request.args.get('turma', '') }}"
-            class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+          <select name="turma" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+            <option value="">Selecione a Turma</option>
+            <option value="A" {% if request.args.get('turma')=='A' %}selected{% endif %}>A</option>
+            <option value="B" {% if request.args.get('turma')=='B' %}selected{% endif %}>B</option>
+            <option value="C" {% if request.args.get('turma')=='C' %}selected{% endif %}>C</option>
+            <option value="D" {% if request.args.get('turma')=='D' %}selected{% endif %}>D</option>
+            <option value="E" {% if request.args.get('turma')=='E' %}selected{% endif %}>E</option>
+            <option value="F" {% if request.args.get('turma')=='F' %}selected{% endif %}>F</option>
+          </select>
         </div>
+      </div>
 
-        <div>
-          <label class="font-semibold block mb-1">Aluno:</label>
-          <input type="text" name="aluno" placeholder="Nome do aluno" value="{{ request.args.get('aluno', '') }}"
-            class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
-        </div>
+      <div>
+        <label class="font-semibold block mb-1">Aluno(a):</label>
+        <input type="text" name="aluno" placeholder="Nome do aluno(a)" value="{{ request.args.get('aluno', '') }}"
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+      </div>
 
-        <div class="flex items-center space-x-2 pt-6">
-          <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600" {% if
-            request.args.get('semana_atual') %}checked{% endif %}>
-          <label for="semana_atual" class="font-medium">Mostrar registros da semana atual</label>
-        </div>
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600" {% if
+          request.args.get('semana_atual') %}checked{% endif %}>
+        <label for="semana_atual" class="font-medium">Mostrar registros da semana atual</label>
       </div>
 
       <div class="text-center flex flex-wrap justify-center gap-4 pt-4">
@@ -100,7 +111,7 @@
       <table class="min-w-full bg-white rounded-xl shadow">
         <thead class="bg-blue-100 text-blue-800">
           <tr>
-            <th class="py-3 px-4 text-left font-semibold">Aluno</th>
+            <th class="py-3 px-4 text-left font-semibold">Aluno(a)</th>
             <th class="py-3 px-4 text-left font-semibold">Turma</th>
             <th class="py-3 px-4 text-left font-semibold">Turno</th>
             <th class="py-3 px-4 text-left font-semibold">Data</th>
@@ -114,13 +125,13 @@
           <tr class="border-t hover:bg-gray-50 cursor-pointer active:ring-2 active:ring-blue-300"
             data-aluno="{{ registro['aluno'] }}" data-turma="{{ registro['turma'] }}"
             data-turno="{{ registro['turno'] }}"
-            data-data="{{ registro['data'].strftime('%d/%m/%Y') if registro['data'] else '' }}"
+            data-data="{{ registro['data']|datetimeformat('%d/%m/%Y') if registro['data'] else '' }}"
             data-entrada="{{ registro['horario_entrada'] or '-' }}" data-saida="{{ registro['horario_saida'] or '-' }}"
             data-duracao="{{ registro['duracao'] }}" onclick="mostrarDetalhesComDataset(this)">
             <td class="py-2 px-4">{{ registro['aluno'] }}</td>
             <td class="py-2 px-4">{{ registro['turma'] }}</td>
             <td class="py-2 px-4">{{ registro['turno'] }}</td>
-            <td class="py-2 px-4">{{ registro['data'].strftime('%d/%m/%Y') if registro['data'] }}</td>
+            <td class="py-2 px-4">{{ registro['data']|datetimeformat('%d/%m/%Y') if registro['data'] }}</td>
             <td class="py-2 px-4">{{ registro['horario_entrada'] or '-' }}</td>
             <td class="py-2 px-4">{{ registro['horario_saida'] or '-' }}</td>
             <td class="py-2 px-4">{{ registro['duracao'] }}</td>
@@ -128,6 +139,35 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+
+    <div class="flex justify-center items-center gap-4 mt-6">
+      {% if pagina_atual > 1 %}
+      <a href="{{ url_for('relatorios', pagina=pagina_atual-1, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+        Página Anterior
+      </a>
+      {% endif %}
+
+      <span class="py-2 px-4 text-gray-700">
+        Página {{ pagina_atual }} de {{ total_paginas }}
+      </span>
+
+      {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios', pagina=pagina_atual+1, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+        Próxima
+        </a>
+        {% endif %}
     </div>
 
     <div class="text-center mt-10">
@@ -156,6 +196,25 @@
     {% else %}
     <p class="text-center text-gray-600 mt-10">Nenhum registro encontrado!</p>
     {% endif %}
+  </div>
+
+  <div id="modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+      <h3 class="text-lg font-bold mb-4">Detalhes do Aluno</h3>
+      <div>
+        <p><strong>Aluno:</strong> <span id="modalAluno"></span></p>
+        <p><strong>Turma:</strong> <span id="modalTurma"></span></p>
+        <p><strong>Turno:</strong> <span id="modalTurno"></span></p>
+        <p><strong>Data:</strong> <span id="modalData"></span></p>
+        <p><strong>Entrada:</strong> <span id="modalEntrada"></span></p>
+        <p><strong>Saída:</strong> <span id="modalSaida"></span></p>
+        <p><strong>Duração:</strong> <span id="modalDuracao"></span></p>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button onclick="fecharModal()"
+          class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">

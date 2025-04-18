@@ -9,21 +9,21 @@ from flask_socketio import SocketIO
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from modulo1_reconhecimento.engine import carregar_face_model
-from modulo1_reconhecimento.relatorios import gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
-from modulo1_reconhecimento.stream import gerar_frames, recarregar_embeddings, iniciar_camera, liberar_camera
-from modulo1_reconhecimento.cadastro import processar_cadastro_web
-from database.connection import get_db_connection
-from modulo1_reconhecimento.crud_alunos import listar_alunos, atualizar_aluno, excluir_aluno
-
 from modulo1_reconhecimento.controle_tempo import obter_configuracao_tempo, atualizar_configuracao_tempo
+from modulo1_reconhecimento.crud_alunos import listar_alunos, atualizar_aluno, excluir_aluno
+from database.connection import get_db_connection
+from modulo1_reconhecimento.cadastro import processar_cadastro_web
+from modulo1_reconhecimento.stream import gerar_frames, recarregar_embeddings, iniciar_camera, liberar_camera
+from modulo1_reconhecimento.relatorios import gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
+from modulo1_reconhecimento.engine import carregar_face_model
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 webcam_ativa = False
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-FOTOS_ALUNOS_DIR = os.path.join(BASE_DIR, "modulo1_reconhecimento", "fotos_alunos")
+FOTOS_ALUNOS_DIR = os.path.join(
+    BASE_DIR, "modulo1_reconhecimento", "fotos_alunos")
 REQUIRED_DIRS = [
     "modulo1_reconhecimento/fotos_alunos",
     "modulo1_reconhecimento/embeddings_cache"
@@ -113,32 +113,55 @@ def relatorios():
     data_inicio = request.args.get('data_inicio', '')
     data_fim = request.args.get('data_fim', '')
     turno = request.args.get('turno', '')
+    ano = request.args.get('ano', '')
     turma = request.args.get('turma', '')
+    turma_completa = f"{ano} {turma}".strip() if ano and turma else ''
     aluno = request.args.get('aluno', '')
     semana_atual = request.args.get('semana_atual', '')
 
+    pagina = int(request.args.get('pagina', 1))
+    por_pagina = 15
     if semana_atual:
         hoje = date.today()
-        data_inicio = (hoje - timedelta(days=hoje.weekday())).strftime('%Y-%m-%d')
-        data_fim = (hoje + timedelta(days=6 - hoje.weekday())).strftime('%Y-%m-%d')
+        data_inicio = (hoje - timedelta(days=hoje.weekday())
+                       ).strftime('%Y-%m-%d')
+        data_fim = (hoje + timedelta(days=6 - hoje.weekday())
+                    ).strftime('%Y-%m-%d')
 
     try:
-        registros = gerar_relatorio_presenca(data_inicio, data_fim, turno, turma, aluno)
+        registros, total_paginas = gerar_relatorio_presenca(
+            data_inicio, data_fim, turno, turma_completa, aluno, pagina, por_pagina
+        )
     except Exception as e:
         print(f"❌ Erro ao gerar relatório: {e}")
         registros = []
+        total_paginas = 1
 
-    return render_template('relatorio.html', registros=registros)
+    return render_template(
+        'relatorio.html',
+        registros=registros,
+        pagina_atual=pagina,
+        total_paginas=total_paginas,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        turno=turno,
+        turma=turma,
+        ano=ano,
+        aluno=aluno
+    )
 
 @app.route('/baixar_relatorio/<formato>')
 def baixar_relatorio(formato):
     data_inicio = request.args.get('data_inicio', '')
     data_fim = request.args.get('data_fim', '')
     turno = request.args.get('turno', 'Todos')
+    ano = request.args.get('ano', '')
     turma = request.args.get('turma', '')
+    turma_completa = f"{ano} {turma}".strip() if ano and turma else ''
     aluno = request.args.get('aluno', '')
 
-    registros = gerar_relatorio_presenca(data_inicio, data_fim, turno, turma, aluno)
+    registros = gerar_relatorio_presenca(
+        data_inicio, data_fim, turno, turma_completa, aluno)[0]
 
     formatos = {
         'pdf': ('application/pdf', gerar_pdf, 'pdf'),
@@ -157,6 +180,7 @@ def baixar_relatorio(formato):
 @app.route('/cadastro')
 def cadastro():
     return render_template('cadastro.html')
+
 
 @app.route('/alunos')
 def alunos():
@@ -253,4 +277,5 @@ def abrir_navegador():
 
 if __name__ == '__main__':
     threading.Thread(target=abrir_navegador).start()
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=5000,
+                 debug=True, use_reloader=False)

@@ -15,9 +15,11 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 ## 🧠 Funcionalidades
 
 - **Reconhecimento facial em tempo real** via webcam para identificar alunos automaticamente.
-- **Cadastro de alunos** com nome, turma, turno e envio de foto.
+- **CRUD completo de alunos**: crie, visualize, edite e exclua alunos pela interface web.
+- **Cadastro com envio de foto**, turma e turno, com validações e mensagens interativas.
 - **Treinamento de rostos** armazenados com uso de embeddings otimizados.
 - **Registro automático de entrada e saída** com data e hora no formato brasileiro (dd/mm/aaaa hh:mm:ss).
+- **Controle de tempo entre registros** para o mesmo aluno, evitando múltiplas marcações em curto intervalo.
 - **Interface web** com alertas persistentes por aluno, organizados por nome, e filtros de visualização por tipo de registro (entrada/saída).
 - **Geração de relatórios** com filtros avançados (por aluno, turma, data e tipo de registro).
 - **Exportação de relatórios** em formatos **PDF**, **Excel** e **TXT**.
@@ -26,7 +28,7 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 - **Otimizações de desempenho** para ambientes com muitos alunos (resize de imagem, controle de FPS).
 - **InsightFace** para melhorar a precisão e a performance do reconhecimento facial.
 - **Alertas mais detalhados**, como "Aluno reconhecido e entrada registrada" e "Aluno reconhecido e saída registrada".
-- **Evita duplicação de alertas** por aluno, com controle de tempo para evitar múltiplos alertas em curto intervalo.
+- **Evita duplicação de alertas** por aluno, com controle de tempo configurável.
 - **Mensagens de sucesso e erro** ao executar um registro, proporcionando uma experiência mais interativa.
 
 ---
@@ -292,10 +294,12 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 
 ## 📌 Observações
 
-- Suporta nomes com espaços e acentos.
-- Utiliza embeddings em cache para acelerar o reconhecimento.
-- Entradas e saídas são diferenciadas com base no último registro.
-- Evita múltiplos alertas em curto período para o mesmo aluno.
+- Suporta **nomes com espaços e acentos**, mantendo compatibilidade com a língua portuguesa.
+- Utiliza **embeddings em cache** para acelerar o reconhecimento facial e reduzir o consumo de recursos.
+- **Entradas e saídas automáticas** são determinadas com base no último registro do aluno.
+- Evita **múltiplos alertas** em curto período para o mesmo aluno, garantindo precisão nos registros.
+- **CRUD completo de alunos** disponível diretamente na interface web, com atualizações em tempo real.
+- **Tempo mínimo entre registros** é configurável no banco de dados, oferecendo controle flexível sobre duplicações.
 
 ---
 
@@ -303,22 +307,22 @@ A câmera será ativada automaticamente e exibirá o vídeo em tempo real.
 
 ### Módulo 1: Reconhecimento Facial e Cadastro
 
-- Cadastro de alunos com nome, turma, turno e envio de foto pela interface web.
-- Fotos salvas na pasta `fotos_alunos/` com o nome do aluno.
-- Treinamento automático após o cadastro: a imagem é convertida em um **embedding facial** com o InsightFace.
-- Embeddings são salvos em cache na pasta `embeddings_cache/`, evitando reprocessamento e acelerando o reconhecimento.
-- Durante o uso, o rosto detectado via webcam é comparado com os embeddings armazenados.
-- Registro automático de **entrada** ou **saída** com base no último registro do aluno.
-- Sistema de alertas por aluno, exibidos de forma clara e organizada na interface.
+- **Cadastro de alunos** com nome, turma, turno e envio de foto pela interface web.
+- **Fotos salvas** na pasta `fotos_alunos/` com o id, nome do aluno e turma.
+- **Treinamento automático** após o cadastro: a imagem é convertida em um **embedding facial** com o InsightFace.
+- **Embeddings armazenados em cache** na pasta `embeddings_cache/`, evitando reprocessamento e acelerando o reconhecimento facial.
+- Durante o uso, o **rosto detectado** via webcam é comparado com os embeddings armazenados para identificar o aluno.
+- **Registro automático de entrada ou saída** com base no último registro do aluno.
+- **Sistema de alertas** por aluno, exibidos de forma clara e organizada na interface web.
 
 ### Módulo 2: Interface Web e Relatórios
 
-- Interface web interativa para cadastro, visualização da câmera e relatórios.
-- Comunicação em tempo real com **SocketIO** (WebSocket).
-- Alertas visuais dinâmicos informando ações realizadas (cadastro, reconhecimento, entrada/saída).
-- Relatórios filtráveis por nome, turma, data e tipo de registro (entrada ou saída).
-- Exportação de relatórios em **PDF**, **Excel** e **TXT** com um clique.
-- Interface moderna utilizando **TailwindCSS** e componentes reutilizáveis.
+- **Interface web interativa** para cadastro, visualização da câmera em tempo real e geração de relatórios.
+- **Comunicação em tempo real** via **SocketIO** (WebSocket), permitindo atualizações instantâneas na interface.
+- **Alertas visuais dinâmicos** informando ações realizadas (cadastro, reconhecimento, entrada/saída).
+- **Relatórios filtráveis** por nome, turma, data e tipo de registro (entrada ou saída).
+- **Exportação de relatórios** em formatos **PDF**, **Excel** e **TXT** com apenas um clique.
+- **Interface moderna** utilizando **TailwindCSS** e componentes reutilizáveis para otimizar a experiência do usuário.
 
 ---
 
