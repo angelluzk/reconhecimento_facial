@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import threading
 import time
 
-cache_dados_aluno = {} # Cache temporário para nome e turma.
+cache_dados_aluno = {} # Cria um cache (memória temporária) para guardar o nome e turma dos alunos por um tempo curto (10 segundos).
 
 # Caminho onde ficam salvas as fotos dos alunos.
 FOTOS_DIR = os.path.join(os.path.dirname(__file__), 'fotos_alunos')
@@ -20,7 +20,7 @@ def garantir_diretorios():
     if not os.path.exists(EMBEDDINGS_DIR):
         os.makedirs(EMBEDDINGS_DIR)
 
-garantir_diretorios() # Cria os diretórios assim que o arquivo for importado ou executado.
+garantir_diretorios() # Chama a função acima assim que esse arquivo é importado ou rodado.
 
 # Função que atualiza os dados de um aluno(a) no banco de dados.
 def atualizar_aluno(id_aluno, nome, turno, turma, foto_path=None):
@@ -28,14 +28,14 @@ def atualizar_aluno(id_aluno, nome, turno, turma, foto_path=None):
         conn = get_db_connection()
         with conn.cursor() as cursor:
             if foto_path:
-                # Atualiza tudo, inclusive a foto.
+                # Atualiza todos os dados, incluindo o caminho da nova foto.
                 cursor.execute(""" 
                     UPDATE alunos 
                     SET nome = %s, turno = %s, turma = %s, foto = %s 
                     WHERE id = %s
                 """, (nome, turno, turma, foto_path, id_aluno))
             else:
-                # Atualiza apenas os dados, sem alterar a foto.
+                # Atualiza só nome, turno e turma (mantém a foto antiga).
                 cursor.execute("""
                     UPDATE alunos 
                     SET nome = %s, turno = %s, turma = %s 
@@ -107,20 +107,60 @@ def excluir_aluno(id_aluno):
     finally:
         conn.close()
 
-# Função que retorna uma lista com todos os alunos cadastrados.
-def listar_alunos():
+# Função que retorna uma lista de alunos com filtros opcionais por nome, turma, turno e paginação
+def listar_alunos(turno=None, turma=None, nome=None, pagina=1, alunos_por_pagina=10):
     try:
         conn = get_db_connection()
         with conn.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT * FROM alunos")
+            offset = (pagina - 1) * alunos_por_pagina # Para pular os alunos das páginas anteriores.
+
+            # Construção da consulta com filtros.
+            query = "SELECT * FROM alunos WHERE 1=1"
+            params = []
+            
+            # Adiciona os filtros conforme necessário.
+            if turno:
+                query += " AND turno = %s"
+                params.append(turno)
+            if turma:
+                query += " AND turma = %s"
+                params.append(turma)
+            if nome:
+                query += " AND nome LIKE %s"
+                params.append(f"%{nome}%")
+            
+            # Adiciona a parte de limite e página.
+            query += " LIMIT %s OFFSET %s"
+            params.extend([alunos_por_pagina, offset])
+
+            cursor.execute(query, params)
             alunos = cursor.fetchall()
 
-        return alunos
+            # Consulta para contar o total de alunos com os filtros aplicados.
+            count_query = "SELECT COUNT(*) FROM alunos WHERE 1=1"
+            count_params = []
+            
+            if turno:
+                count_query += " AND turno = %s"
+                count_params.append(turno)
+            if turma:
+                count_query += " AND turma = %s"
+                count_params.append(turma)
+            if nome:
+                count_query += " AND nome LIKE %s"
+                count_params.append(f"%{nome}%")
+
+            cursor.execute(count_query, count_params)
+            resultado = cursor.fetchone()
+            total_alunos = list(resultado.values())[0] if resultado else 0
+
+        return alunos, total_alunos
     except Exception as e:
         print(f"[ERRO] Erro ao listar alunos: {e}")
-        return []
+        return [], 0
     finally:
-        conn.close()
+        if 'conn' in locals():
+            conn.close()
 
 # Função que busca no banco de dados o nome e a turma do aluno(a), com base no nome padronizado (maiúsculo e sem espaços).
 def buscar_nome_e_turma_por_nome(nome_padronizado):

@@ -27,7 +27,7 @@ def calcular_duracao(entrada_str, saida_str):
         return "—"
 
 # Função principal que consulta o banco e gera o relatório de presença com base nos filtros escolhidos.
-def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=None, aluno=None, pagina=1, por_pagina=15):
+def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=None, aluno=None, pagina=1, por_pagina=10):
     # Conecta no banco e cria um cursor que permite executar SQL.
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)

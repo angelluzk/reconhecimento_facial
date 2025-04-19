@@ -181,10 +181,22 @@ def baixar_relatorio(formato):
 def cadastro():
     return render_template('cadastro.html')
 
-
-@app.route('/alunos')
+@app.route('/alunos', methods=['GET'])
 def alunos():
-    return render_template('alunos.html')
+    turno = request.args.get('turno')
+    ano = request.args.get('ano')
+    turma = request.args.get('turma')
+    nome = request.args.get('nome')
+    pagina = int(request.args.get('pagina', 1))
+
+    turma_completa = f"{ano} {turma}".strip() if ano and turma else None
+    alunos, total_alunos = listar_alunos(turno=turno, turma=turma_completa, nome=nome, pagina=pagina)
+    
+    # Cálculo de total de páginas
+    alunos_por_pagina = 10
+    total_paginas = (total_alunos // alunos_por_pagina) + (1 if total_alunos % alunos_por_pagina > 0 else 0)
+
+    return render_template('alunos.html', alunos=alunos, pagina_atual=pagina, total_paginas=total_paginas)
 
 @app.route('/cadastrar_aluno', methods=['POST'])
 def cadastrar_aluno():
@@ -238,8 +250,23 @@ def detalhes_aluno(id_aluno):
 
 @app.route('/api/alunos', methods=['GET'])
 def get_alunos():
-    alunos = listar_alunos()
-    return jsonify(alunos)
+    turno = request.args.get('turno')
+    ano = request.args.get('ano')
+    turma = request.args.get('turma')
+    nome = request.args.get('nome')
+    pagina = int(request.args.get('pagina', 1))
+    alunos_por_pagina = 10
+
+    turma_completa = f"{ano} {turma}".strip() if ano and turma else None
+    alunos, total_alunos = listar_alunos(turno=turno, turma=turma_completa, nome=nome, pagina=pagina, alunos_por_pagina=alunos_por_pagina)
+
+    total_paginas = (total_alunos // alunos_por_pagina) + (1 if total_alunos % alunos_por_pagina > 0 else 0)
+
+    return jsonify({
+        'alunos': alunos,
+        'total_paginas': total_paginas,
+        'pagina_atual': pagina
+    })
 
 @app.route('/api/alunos/<int:id_aluno>', methods=['PUT'])
 def put_aluno(id_aluno):

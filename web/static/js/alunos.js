@@ -81,10 +81,18 @@ function fecharModal() {
   document.getElementById("modalAluno").classList.add("hidden");
 }
 
-// Função para carregar os alunos da API e exibir na tabela.
-async function carregarAlunos() {
+// Função para carregar os alunos e exibir na tabela.
+function carregarAlunos(pagina = 1) {
+  const params = new URLSearchParams(window.location.search);
+
+  const nome = params.get("nome") || "";
+  const ano = params.get("ano") || "";
+  const turma = params.get("turma") || "";
+
   const tbody = document.getElementById("tabelaAlunos");
-  // Mostra uma animação de carregamento enquanto os dados são buscados.
+  const pagination = document.getElementById("pagination");
+
+  // Mostra um loading animado enquanto carrega os alunos.
   tbody.innerHTML = `
     <tr>
       <td colspan="6" class="text-center py-4">
@@ -97,35 +105,56 @@ async function carregarAlunos() {
       </td>
     </tr>`;
 
-  try {
-    const res = await fetch("/api/alunos");
-    const alunos = await res.json();
+  // Faz a requisição à API com filtros e paginação.
+  fetch(`/api/alunos?nome=${nome}&ano=${ano}&turma=${turma}&pagina=${pagina}`)
+    .then(res => res.json())
+    .then(data => {
+      const alunos = data.alunos;
+      const totalPaginas = data.total_paginas;
+      const paginaAtual = data.pagina_atual;
 
-    tbody.innerHTML = "";
+      tbody.innerHTML = ""; // Limpa a tabela para adicionar os novos dados.
 
-    // Adiciona cada aluno(a) como uma linha na tabela.
-    alunos.forEach((aluno) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="px-4 py-2">${aluno.id}</td>
-        <td class="px-4 py-2">${aluno.nome}</td>
-        <td class="px-4 py-2">${aluno.turno}</td>
-        <td class="px-4 py-2">${aluno.turma}</td>
-        <td class="px-4 py-2">
-          <img src="/fotos_alunos/${aluno.foto}" alt="Foto" class="w-10 h-10 rounded-full object-cover" />
-        </td>
-        <td class="px-4 py-2">
-          <button onclick='abrirModal(${JSON.stringify(aluno)}, "editar")' class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i> Alterar</button>
-          <button onclick='abrirModal(${JSON.stringify(aluno)}, "visualizar")' class="text-green-600 hover:text-green-800 mr-2"><i class="fas fa-eye"></i> Visualizar</button>
-          <button onclick='deletarAluno(${aluno.id})' class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i> Deletar</button>
-        </td>
+      if (alunos.length === 0) {
+        // Mostra mensagem se não encontrar alunos.
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">Nenhum aluno encontrado.</td>
+          </tr>`;
+        return;
+      }
+
+      // Monta a linha da tabela para cada aluno.
+      alunos.forEach((aluno) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="px-4 py-2">${aluno.id}</td>
+          <td class="px-4 py-2">${aluno.nome}</td>
+          <td class="px-4 py-2">${aluno.turno}</td>
+          <td class="px-4 py-2">${aluno.turma}</td>
+          <td class="px-4 py-2">
+            <img src="/fotos_alunos/${aluno.foto}" alt="Foto" class="w-10 h-10 rounded-full object-cover" />
+          </td>
+          <td class="px-4 py-2">
+            <button onclick='abrirModal(${JSON.stringify(aluno)}, "editar")' class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i> Alterar</button>
+            <button onclick='abrirModal(${JSON.stringify(aluno)}, "visualizar")' class="text-green-600 hover:text-green-800 mr-2"><i class="fas fa-eye"></i> Visualizar</button>
+            <button onclick='deletarAluno(${aluno.id})' class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i> Deletar</button>
+          </td>
+        `;
+        tbody.appendChild(tr); // Adiciona à tabela.
+      });
+
+      // Atualizar a paginação
+      pagination.innerHTML = `
+        ${paginaAtual > 1 ? `<a href="#" onclick="carregarAlunos(${paginaAtual - 1})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Anterior</a>` : ''}
+        <span class="py-2 px-4 text-gray-700">Página ${paginaAtual} de ${totalPaginas}</span>
+        ${paginaAtual < totalPaginas ? `<a href="#" onclick="carregarAlunos(${paginaAtual + 1})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Próxima</a>` : ''}
       `;
-      tbody.appendChild(tr);
+    })
+    .catch(err => {
+      console.error("Erro ao carregar alunos:", err);
+      mostrarToast("Erro ao carregar alunos. Tente novamente!", "erro");
     });
-  } catch (err) {
-    console.error("Erro ao carregar alunos:", err);
-    mostrarToast("Erro ao carregar alunos. Tente novamente!", "erro");
-  }
 }
 
 // Função para deletar aluno(a) após confirmação.

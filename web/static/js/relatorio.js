@@ -1,6 +1,6 @@
 // Função que mostra o modal com os detalhes de presença do aluno ao clicar em um item da lista.
 function mostrarDetalhesComDataset(el) {
-    // Verifica se o modal existe na página.
+  // Verifica se o modal existe na página.
   if (document.getElementById('modal')) {
     // Preenche os campos do modal com os dados armazenados nos atributos data-* do elemento clicado.
     document.getElementById('modalAluno').textContent = el.dataset.aluno;

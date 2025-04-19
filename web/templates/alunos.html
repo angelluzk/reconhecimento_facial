@@ -37,22 +37,67 @@
     </div>
   </header>
 
-  <main class="flex-1 p-8">
-    <div class="mb-6">
-      <h2 class="text-2xl font-semibold text-gray-800">Lista de Alunos</h2>
+  <main class="max-w-screen-2xl mx-auto flex-1 p-6">
+    <h2 class="text-3xl font-bold text-center mb-8 text-blue-700">
+      <i class="fa-solid fa-user mr-2"></i>Lista de Alunos
+    </h2>
     </div>
 
+    <!-- Filtros -->
+    <form method="get" class="bg-white p-6 rounded-xl shadow-md space-y-6">
+      <div>
+        <label class="font-semibold block mb-1">Aluno(a):</label>
+        <input type="text" name="nome" placeholder="Nome do aluno(a)" value="{{ request.args.get('nome', '') }}"
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="font-semibold block mb-1">Ano:</label>
+          <select name="ano" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+            <option value="">Todos</option>
+            <option value="1º" {% if request.args.get('ano')=='1º' %}selected{% endif %}>1º Ano</option>
+            <option value="2º" {% if request.args.get('ano')=='2º' %}selected{% endif %}>2º Ano</option>
+            <option value="3º" {% if request.args.get('ano')=='3º' %}selected{% endif %}>3º Ano</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="font-semibold block mb-1">Turma:</label>
+          <select name="turma" class="w-full border px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+            <option value="">Todas</option>
+            {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+            <option value="{{ turma }}" {% if request.args.get('turma')==turma %}selected{% endif %}>{{ turma }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="text-center flex flex-wrap justify-center gap-4 pt-4">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow transition">
+          <i class="fas fa-search mr-2"></i>Filtrar
+        </button>
+
+        <a href="{{ url_for('alunos') }}"
+          class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-8 py-2 rounded-lg shadow transition">
+          <i class="fas fa-eraser mr-2"></i>Limpar Filtros
+        </a>
+      </div>
+    </form>
+
     <!-- Tabela que exibe os alunos cadastrados. -->
-    <div class="overflow-x-auto bg-white rounded-lg shadow">
-      <table class="min-w-full text-left text-sm">
-        <thead class="bg-gray-200 text-gray-600 uppercase text-xs">
+    <div class="overflow-x-auto mt-10">
+      <table class="min-w-full bg-white rounded-xl shadow">
+        <thead class="bg-blue-100 text-blue-800">
           <tr>
-            <th class="px-4 py-2">ID</th>
-            <th class="px-4 py-2">Nome</th>
-            <th class="px-4 py-2">Turno</th>
-            <th class="px-4 py-2">Turma</th>
-            <th class="px-4 py-2">Foto</th>
-            <th class="px-4 py-2">Ações</th>
+            <th class="py-3 px-4 text-left font-semibold">ID</th>
+            <th class="py-3 px-4 text-left font-semibold">Nome</th>
+            <th class="py-3 px-4 text-left font-semibold">Turno</th>
+            <th class="py-3 px-4 text-left font-semibold">Turma</th>
+            <th class="py-3 px-4 text-left font-semibold">Foto</th>
+            <th class="py-3 px-4 text-left font-semibold">Ações</th>
           </tr>
         </thead>
         <!-- O corpo da tabela será preenchido dinamicamente via JS. -->
@@ -61,12 +106,34 @@
       </table>
     </div>
 
-    <!-- Paginação da tabela (JS preenche isso também). -->
+    <!-- Paginação. -->
     <div id="pagination" class="flex justify-center mt-4">
+      <div class="flex justify-center items-center gap-4 mt-6">
+        {% if pagina_atual > 1 %}
+        <a href="{{ url_for('alunos', pagina=pagina_atual-1, 
+          turno=request.args.get('turno'), 
+          ano=request.args.get('ano'),
+          turma=request.args.get('turma'), 
+          nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+          Anterior
+        </a>
+        {% endif %}
+
+        <span class="py-2 px-4 text-gray-700">
+          Página {{ pagina_atual }} de {{ total_paginas }}
+        </span>
+
+        {% if pagina_atual < total_paginas %} <a href="{{ url_for('alunos', pagina=pagina_atual+1, 
+          turno=request.args.get('turno'), 
+          ano=request.args.get('ano'),
+          turma=request.args.get('turma'), 
+          nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+          Próxima
+          </a>
+          {% endif %}
+      </div>
     </div>
   </main>
-  </div>
-
 
   <!-- Modal para editar dados do aluno(a). -->
   <div id="modalAluno" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -132,13 +199,16 @@
   </div>
 
   <!-- Toast para mensagens de sucesso (ex: aluno(a) salvo, excluído etc.). -->
-  <div id="toast"
-  class="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-  <div
-    class="bg-green-500 text-white px-6 py-3 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-auto"
-    id="toastContent">
+  <div id="toast" class="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+    <div
+      class="bg-green-500 text-white px-6 py-3 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-auto"
+      id="toastContent">
+    </div>
   </div>
-</div>
+
+  <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t">
+    &copy; <span id="anoAtual">2025</span> Sistema Escolar com Reconhecimento Facial
+  </footer>
 
 </body>
 
