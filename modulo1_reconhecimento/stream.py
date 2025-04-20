@@ -56,25 +56,35 @@ def recarregar_embeddings():
 
 # Função que desenha um texto centralizado com fundo no frame (usando PIL para melhor visual).
 def desenhar_texto(frame, texto, posicao, cor=(255, 255, 255), cor_fundo=(0, 0, 0)):
+    # Converte o frame do OpenCV (NumPy array) para uma imagem do tipo PIL.
     imagem_pil = Image.fromarray(frame)
+    # Cria um objeto para desenhar na imagem PIL.
     draw = ImageDraw.Draw(imagem_pil)
     try:
+        # Tenta carregar a fonte Arial com tamanho 18.
         font = ImageFont.truetype("arial.ttf", 18)
     except IOError:
+        # Se não encontrar a fonte Arial, usa a fonte padrão.
         font = ImageFont.load_default()
 
+    # Calcula a área que o texto vai ocupar (bounding box).
     bbox = draw.textbbox((0, 0), texto, font=font)
-    largura_texto = bbox[2] - bbox[0]
-    altura_texto = bbox[3] - bbox[1]
+    largura_texto = bbox[2] - bbox[0] # Largura do texto.
+    altura_texto = bbox[3] - bbox[1] # Altura do texto.
 
+    # Posição central fornecida.
     centro_x = posicao[0]
     y = posicao[1]
 
+    # Calcula a coordenada X para centralizar o texto horizontalmente.
     x = int(centro_x - (largura_texto / 2))
 
+    # Desenha um retângulo de fundo atrás do texto (um pouco maior que o texto).
     draw.rectangle([x - 3, y, x + largura_texto + 3, y + altura_texto + 4], fill=cor_fundo)
+    # Escreve o texto por cima do retângulo. 
     draw.text((x, y + 2), texto, font=font, fill=cor)
 
+    # Converte a imagem de volta para array NumPy (para uso com OpenCV novamente).
     return np.array(imagem_pil)
 
 # Função do loop principal que captura frames da câmera, detecta rostos e envia alertas. Também envia os frames com anotações (nome do aluno, ou 'Desconhecido') para o navegador.

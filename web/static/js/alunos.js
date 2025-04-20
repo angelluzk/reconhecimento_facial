@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const turma = document.querySelector('input[name="turma"]:checked')?.value || "";
 
     const turmaCompleta = `${ano} ${turma}`; // Junta os valores (ex: "1º A").
-    const payload = { nome, turno, turma: turmaCompleta }; // Dados a serem enviados.
+    const payload = { nome, turno, turma: turmaCompleta }; // Dados a serem enviados.   
 
     try {
       // Envia requisição POST (novo) ou PUT (edição) para a API.
@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       if (res.ok) {
         fecharModal();
-        carregarAlunos();
+        const paginaAtual = getPaginaAtual(); // Pega a página atual da URL.
+        carregarAlunos(paginaAtual); // Atualiza a lista de alunos na página atual.
         mostrarToast("Aluno(a) salvo com sucesso!");
       } else {
         mostrarToast("Erro ao salvar aluno(a).", "erro");
@@ -50,7 +51,7 @@ function abrirModal(aluno = null, modo = "editar") {
   document.getElementById("alunoNome").value = aluno?.nome || "";
   document.getElementById("alunoTurno").value = aluno?.turno || "integral";
 
-  // Desmarca todas as opções de ano e turma antes de marcar as corretas.
+  // Marcando as opções corretas de ano e turma.
   document.querySelectorAll('input[name="ano"]').forEach((radio) => (radio.checked = false));
   document.querySelectorAll('input[name="turma"]').forEach((radio) => (radio.checked = false));
 
@@ -79,6 +80,12 @@ function abrirModal(aluno = null, modo = "editar") {
 // Função para fechar o modal.
 function fecharModal() {
   document.getElementById("modalAluno").classList.add("hidden");
+}
+
+// Função para obter a página atual da URL.
+function getPaginaAtual() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("pagina") || 1;
 }
 
 // Função para carregar os alunos e exibir na tabela.
@@ -138,7 +145,7 @@ function carregarAlunos(pagina = 1) {
           <td class="px-4 py-2">
             <button onclick='abrirModal(${JSON.stringify(aluno)}, "editar")' class="text-blue-600 hover:text-blue-800 mr-2"><i class="fas fa-edit"></i> Alterar</button>
             <button onclick='abrirModal(${JSON.stringify(aluno)}, "visualizar")' class="text-green-600 hover:text-green-800 mr-2"><i class="fas fa-eye"></i> Visualizar</button>
-            <button onclick='deletarAluno(${aluno.id})' class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i> Deletar</button>
+            <button onclick='deletarAluno(${aluno.id}, ${paginaAtual})' class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i> Deletar</button>
           </td>
         `;
         tbody.appendChild(tr); // Adiciona à tabela.
@@ -150,6 +157,11 @@ function carregarAlunos(pagina = 1) {
         <span class="py-2 px-4 text-gray-700">Página ${paginaAtual} de ${totalPaginas}</span>
         ${paginaAtual < totalPaginas ? `<a href="#" onclick="carregarAlunos(${paginaAtual + 1})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Próxima</a>` : ''}
       `;
+
+      // 🔧 Atualiza a URL com a página atual, sem recarregar a página.
+      const url = new URL(window.location);
+      url.searchParams.set("pagina", paginaAtual);
+      window.history.pushState({}, "", url);
     })
     .catch(err => {
       console.error("Erro ao carregar alunos:", err);
@@ -158,12 +170,12 @@ function carregarAlunos(pagina = 1) {
 }
 
 // Função para deletar aluno(a) após confirmação.
-async function deletarAluno(id) {
+async function deletarAluno(id, paginaAtual) {
   if (!confirm("Deseja realmente deletar este aluno(a)?")) return;
   try {
     const res = await fetch(`/api/alunos/${id}`, { method: "DELETE" });
     if (res.ok) {
-      carregarAlunos(); // Atualiza a lista.
+      carregarAlunos(paginaAtual); // Atualiza a lista mantendo a página atual.
       mostrarToast("Aluno(a) excluído com sucesso!");
     } else {
       mostrarToast("Erro ao excluir aluno(a).", "erro");

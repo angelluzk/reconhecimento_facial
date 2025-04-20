@@ -110,7 +110,19 @@
             </button>
           </div>
 
-          <video id="video" autoplay playsinline class="rounded w-full hidden shadow-lg border"></video>
+          <!-- Vídeo com filtro oval por cima -->
+          <div class="relative">
+            <video id="video" autoplay playsinline class="rounded w-full hidden shadow-lg border"></video>
+
+            <!-- Filtro oval com borda tracejada -->
+            <div id="filtro" class="absolute inset-0 pointer-events-none z-10 hidden">
+              <!-- Janela oval com borda tracejada -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-72 h-96 rounded-full border-4 border-dashed border-white bg-transparent z-10"></div>
+              </div>
+            </div>
+          </div>
+
           <canvas id="canvas" class="hidden"></canvas>
 
           <div class="flex justify-center">

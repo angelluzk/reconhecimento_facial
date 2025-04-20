@@ -8,6 +8,14 @@
   border-radius: 0.5rem;
 }
 
+video.hidden {
+  display: none;
+}
+
+video {
+  display: block;
+}
+
 .botao-fechar-modal {
   position: absolute;
   top: 0.5rem;
