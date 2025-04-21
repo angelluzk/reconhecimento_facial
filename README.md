@@ -237,7 +237,7 @@ DB_NAME=reconhecimento_facial
 ├── 📂 database  
 │   ├── __init__.py          
 │   ├── connection.py        
-│   └── reconhecimento_facil.sql    
+│   └── reconhecimento_facil.sql   
 ├── 📂 modulo1_reconhecimento  
 │   ├── __init__.py 
 │   ├── cadastro.py  
@@ -253,6 +253,8 @@ DB_NAME=reconhecimento_facial
 │   │   ├── 📂 css/ 
 │   │   │     ├── cadastro.css
 │   │   │     ├── index.css
+│   │   ├── 📂 imagens/ 
+│   │   │     ├── favicon.png
 │   │   ├── 📂 js/ 
 │   │   │     ├── alunos.js
 │   │   │     ├── cadastro.js
