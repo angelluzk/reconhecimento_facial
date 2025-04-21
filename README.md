@@ -75,7 +75,7 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 | **Memória:** 8 GB de RAM | **Memória:** 16 GB de RAM |
 | **Placa de vídeo:** Gráficos integrados Intel UHD 620 ou superior | **Placa de vídeo:** NVIDIA GTX 1050 ou superior (opcional, para CUDA) |
 | **Armazenamento:** 256 GB SSD | **Armazenamento:** 512 GB SSD |
-| **Webcam:** 720p (HD), 30 FPS | **Webcam:** 1080p (Full HD), 30 FPS ou superior |
+| **Webcam:** 720p (HD), 30 FPS, Foco fixo | **Webcam:** 1080p (Full HD), 30 FPS ou superior, Foco fixo |
 
 ## 📌 Requisitos de Instalação
 
