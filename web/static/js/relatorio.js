@@ -49,6 +49,15 @@ function mostrarDetalhesComDataset(el) {
   }
 }
 
+// Função para exportar mantendo os filtros da URL.
+function exportarRelatorio(tipo) {
+  const urlAtual = new URL(window.location.href); // Pega URL com filtros.
+  const urlBase = `/baixar_relatorio/${tipo}`;
+  const queryParams = window.location.search; // Mantém os filtros da URL atual
+  const urlFinal = `${urlBase}${queryParams}`;
+  window.location.href = urlFinal;
+}
+
 // Função para fechar o modal ocultando ele (troca classe "flex" por "hidden").
 function fecharModal() {
   document.getElementById('modal').classList.remove('flex');

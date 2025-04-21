@@ -2,7 +2,9 @@
 import io # Para trabalhar com arquivos em memória (como PDF, Excel, etc.).
 import pandas as pd # Para lidar com tabelas de dados (tipo Excel).
 from datetime import datetime # Para mexer com datas e horas.
-
+# - BytesIO: usado para manipular dados binários em memória como se fosse um arquivo (útil para imagens, PDFs, etc.).
+# - StringIO: usado para manipular strings em memória como se fosse um arquivo (útil para gerar arquivos TXT ou CSV).
+from io import BytesIO, StringIO 
 #Essas importações do reportlab são essenciais para criar e formatar o conteúdo dentro de um PDF de maneira personalizada e profissional. Elas ajudam a controlar desde o layout geral até os detalhes da formatação de tabelas, textos, cores, espaçamentos e até quebras de página.
 from reportlab.lib.pagesizes import letter # Para gerar arquivos PDF do zero.
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -37,6 +39,7 @@ def calcular_duracao(entrada_str, saida_str):
 
 # Função principal que consulta o banco e gera o relatório de presença com base nos filtros escolhidos.
 def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=None, aluno=None, pagina=None, por_pagina=None):
+
     # Conecta no banco e cria um cursor que permite executar SQL.
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -45,15 +48,19 @@ def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=
         filtros = []  # Lista onde vamos colocando os pedaços do WHERE da consulta.
         parametros = []  # Os valores que vão substituir os %s na query.
 
+        # Filtro de data (se ambos os filtros forem fornecidos).
         if data_inicio and data_fim:
             filtros.append("DATE(r.data_hora) BETWEEN %s AND %s")
             parametros.extend([data_inicio, data_fim])
+        # Filtro de turno.
         if turno and turno not in ["", "Todos"]:
             filtros.append("a.turno = %s")
             parametros.append(turno)
+        # Filtro de turma.
         if turma:
             filtros.append("a.turma = %s")
             parametros.append(turma)
+        # Filtro de aluno.
         if aluno:
             filtros.append("a.nome LIKE %s")
             parametros.append(f"%{aluno}%")
@@ -154,7 +161,7 @@ def gerar_relatorio_presenca(data_inicio=None, data_fim=None, turno=None, turma=
 
 # Função que gera um PDF com os dados de presença organizados de forma simples e legível.
 def gerar_pdf(registros, filtros=None):
-    buffer = io.BytesIO()
+    buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     elementos = []
 
@@ -162,7 +169,6 @@ def gerar_pdf(registros, filtros=None):
     estilo_titulo = styles["Title"]
     estilo_subtitulo = styles["Normal"]
 
-    # Título.
     elementos.append(Paragraph("Relatório de Presença", estilo_titulo))
     elementos.append(Spacer(1, 12))
 
@@ -171,7 +177,7 @@ def gerar_pdf(registros, filtros=None):
         filtros_formatados = []
         if filtros.get("data_inicio") and filtros.get("data_fim"):
             filtros_formatados.append(f"Período: {filtros['data_inicio']} a {filtros['data_fim']}")
-        if filtros.get("turno"):
+        if filtros.get("turno") and filtros['turno'] != 'Todos':
             filtros_formatados.append(f"Turno: {filtros['turno']}")
         if filtros.get("turma"):
             filtros_formatados.append(f"Turma: {filtros['turma']}")
@@ -183,24 +189,11 @@ def gerar_pdf(registros, filtros=None):
         elementos.append(Spacer(1, 12))
 
     # Cabeçalho da tabela.
-    dados = [
-        ["Aluno(a)", "Turma", "Turno", "Data", "Entrada", "Saída", "Duração", "Status"]
-    ]
+    dados = [["Aluno(a)", "Turma", "Turno", "Data", "Entrada", "Saída", "Duração", "Status"]]
 
-    # Corpo da tabela.
     for reg in registros:
-        dados.append([
-            reg['aluno'],
-            reg['turma'],
-            reg['turno'],
-            reg['data'],
-            reg['horario_entrada'],
-            reg['horario_saida'],
-            reg['duracao'],
-            reg['status']
-        ])
+        dados.append([reg['aluno'], reg['turma'], reg['turno'], reg['data'], reg['horario_entrada'], reg['horario_saida'], reg['duracao'], reg['status']])
 
-    # Tabela.
     tabela = Table(dados, repeatRows=1)
     tabela.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#d3d3d3")),
@@ -214,7 +207,6 @@ def gerar_pdf(registros, filtros=None):
 
     elementos.append(tabela)
 
-    # Rodapé com página e data.
     def rodape(canvas, doc):
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
@@ -229,14 +221,14 @@ def gerar_pdf(registros, filtros=None):
 
 # Função que gera uma planilha Excel (.xlsx) com os registros de presença.
 def gerar_excel(registros, filtros=None):
-    # Formata as datas de entrada e saída antes de criar o DataFrame.
+    # Formatação das datas antes de passar para o Excel.
     for reg in registros:
         reg['horario_entrada'] = formatar_data(reg['horario_entrada'])
         reg['horario_saida'] = formatar_data(reg['horario_saida'])
 
     df = pd.DataFrame(registros)
 
-    buffer = io.BytesIO()
+    buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         workbook = writer.book
         worksheet = workbook.add_worksheet('Presenças')
@@ -244,23 +236,23 @@ def gerar_excel(registros, filtros=None):
 
         row = 0
 
-        # Escreve os filtros usados no topo.
+        # Adicionando filtros no topo do arquivo Excel.
         if filtros:
-            if filtros.get("Data_inicio") and filtros.get("data_fim"):
-                worksheet.write(row, 0, f"Período: {filtros['Data_inicio']} a {filtros['data_fim']}")
+            if filtros.get("data_inicio") and filtros.get("data_fim"):
+                worksheet.write(row, 0, f"Período: {filtros['data_inicio']} a {filtros['data_fim']}")
                 row += 1
-            if filtros.get("Turno"):
+            if filtros.get("turno") and filtros['turno'] != 'Todos':
                 worksheet.write(row, 0, f"Turno: {filtros['turno']}")
                 row += 1
-            if filtros.get("Turma"):
+            if filtros.get("turma"):
                 worksheet.write(row, 0, f"Turma: {filtros['turma']}")
                 row += 1
-            if filtros.get("Aluno(a)"):
+            if filtros.get("aluno"):
                 worksheet.write(row, 0, f"Aluno(a): {filtros['aluno']}")
                 row += 1
-            row += 1  # espaço extra.
+            row += 1  # Adiciona uma linha em branco antes da tabela de dados.
 
-        # Escreve a tabela a partir da linha atual.
+        # Escrevendo os dados no Excel.
         df.to_excel(writer, sheet_name='Presenças', startrow=row, index=False)
 
     buffer.seek(0)
@@ -268,21 +260,21 @@ def gerar_excel(registros, filtros=None):
 
 # Função que gera um arquivo de texto simples com os registros (sem formatação, só o conteúdo).
 def gerar_txt(registros, filtros=None):
-    buffer = io.StringIO()
+    buffer = StringIO()
 
-    # Escreve filtros no topo.
+    # Adicionando filtros no início do arquivo TXT.
     if filtros:
-        if filtros.get("Data_inicio") and filtros.get("Data_fim"):
+        if filtros.get("data_inicio") and filtros.get("data_fim"):
             buffer.write(f"Período: {filtros['data_inicio']} a {filtros['data_fim']}\n")
-        if filtros.get("Turno"):
+        if filtros.get("turno") and filtros['turno'] != 'Todos':
             buffer.write(f"Turno: {filtros['turno']}\n")
-        if filtros.get("Turma"):
+        if filtros.get("turma"):
             buffer.write(f"Turma: {filtros['turma']}\n")
-        if filtros.get("Aluno(a)"):
+        if filtros.get("aluno"):
             buffer.write(f"Aluno(a): {filtros['aluno']}\n")
         buffer.write("\n")
 
-    # Escreve os registros.
+    # Escrevendo os registros de presença.
     for reg in registros:
         entrada_formatada = formatar_data(reg['horario_entrada'])
         saida_formatada = formatar_data(reg['horario_saida'])

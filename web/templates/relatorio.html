@@ -148,57 +148,100 @@
     </div>
 
     <div class="flex justify-center items-center gap-4 mt-6">
+      <!-- Botão de Voltar ao Início -->
       {% if pagina_atual > 1 %}
-      <a href="{{ url_for('relatorios', pagina=pagina_atual-1, 
-      data_inicio=request.args.get('data_inicio'), 
-      data_fim=request.args.get('data_fim'), 
-      turno=request.args.get('turno'), 
-      ano=request.args.get('ano'),
-      turma=request.args.get('turma'), 
-      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-        Anterior
+      <a href="{{ url_for('relatorios', pagina=1, 
+        data_inicio=request.args.get('data_inicio'), 
+        data_fim=request.args.get('data_fim'), 
+        turno=request.args.get('turno'), 
+        ano=request.args.get('ano'),
+        turma=request.args.get('turma'), 
+        aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+        << Início </a>
+          {% endif %}
+
+          <!-- Botão Anterior -->
+          {% if pagina_atual > 1 %}
+          <a href="{{ url_for('relatorios', pagina=pagina_atual-1, 
+        data_inicio=request.args.get('data_inicio'), 
+        data_fim=request.args.get('data_fim'), 
+        turno=request.args.get('turno'), 
+        ano=request.args.get('ano'),
+        turma=request.args.get('turma'), 
+        aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+            < Anterior </a>
+              {% endif %}
+
+              <!-- Texto de Status da Página -->
+              <span class="py-2 px-4 text-gray-700">
+                Página {{ pagina_atual }} de {{ total_paginas }}
+              </span>
+
+              <!-- Botão Próxima -->
+              {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios', pagina=pagina_atual+1, 
+        data_inicio=request.args.get('data_inicio'), 
+        data_fim=request.args.get('data_fim'), 
+        turno=request.args.get('turno'), 
+        ano=request.args.get('ano'),
+        turma=request.args.get('turma'), 
+        aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+                Próxima >
+          </a>
+          {% endif %}
+
+          <!-- Botão Ir para o Fim -->
+          {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios', pagina=total_paginas, 
+        data_inicio=request.args.get('data_inicio'), 
+        data_fim=request.args.get('data_fim'), 
+        turno=request.args.get('turno'), 
+        ano=request.args.get('ano'),
+        turma=request.args.get('turma'), 
+        aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+            Última >>
       </a>
       {% endif %}
-
-      <span class="py-2 px-4 text-gray-700">
-        Página {{ pagina_atual }} de {{ total_paginas }}
-      </span>
-
-      {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios', pagina=pagina_atual+1, 
-      data_inicio=request.args.get('data_inicio'), 
-      data_fim=request.args.get('data_fim'), 
-      turno=request.args.get('turno'), 
-      ano=request.args.get('ano'),
-      turma=request.args.get('turma'), 
-      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-        Próxima
-        </a>
-        {% endif %}
     </div>
 
     <div class="text-center mt-10">
       <h3 class="text-xl font-semibold text-gray-700 mb-4">Exportar como:</h3>
       <div class="flex flex-wrap justify-center gap-4">
-        <form action="{{ url_for('baixar_relatorio', formato='pdf', **request.args) }}" method="get">
+
+        <!-- PDF -->
+        <form action="{{ url_for('baixar_relatorio', formato='pdf') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
           <button type="submit"
             class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
             <i class="fas fa-file-pdf"></i>PDF
           </button>
         </form>
-        <form action="{{ url_for('baixar_relatorio', formato='xlsx', **request.args) }}" method="get">
+
+        <!-- Excel -->
+        <form action="{{ url_for('baixar_relatorio', formato='xlsx') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
           <button type="submit"
             class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
             <i class="fas fa-file-excel"></i>Excel
           </button>
         </form>
-        <form action="{{ url_for('baixar_relatorio', formato='txt', **request.args) }}" method="get">
+
+        <!-- TXT -->
+        <form action="{{ url_for('baixar_relatorio', formato='txt') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
           <button type="submit"
             class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
             <i class="fas fa-file-alt"></i>TXT
           </button>
         </form>
+
       </div>
     </div>
+
     {% else %}
     <p class="text-center text-gray-600 mt-10">Nenhum registro encontrado!</p>
     {% endif %}

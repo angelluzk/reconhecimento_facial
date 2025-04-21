@@ -184,52 +184,54 @@ def relatorios():
 # Rota para baixar os relatórios em diferentes formatos (PDF, Excel, TXT).
 @app.route('/baixar_relatorio/<formato>')
 def baixar_relatorio(formato):
-    # Obtém parâmetros da query string da URL.
+    # Pega os filtros da URL.
     data_inicio = request.args.get('data_inicio', '')
     data_fim = request.args.get('data_fim', '')
-    turno = request.args.get('turno', 'Todos')
+    turno = request.args.get('turno', '')
     ano = request.args.get('ano', '')
     turma = request.args.get('turma', '')
     turma_completa = f"{ano} {turma}".strip() if ano and turma else ''
     aluno = request.args.get('aluno', '')
 
-    # Paginação (opcional, se não precisar de paginação, define None).
-    pagina = request.args.get('pagina', None, type=int)  # Mudei de 1 para None.
-    por_pagina = request.args.get('por_pagina', None, type=int)  # Mudei de 10 para None.
+    # Paginação opcional.
+    pagina = request.args.get('pagina', None, type=int)
+    por_pagina = request.args.get('por_pagina', None, type=int)
 
-    # Chama a função para gerar o relatório de presença com os parâmetros.
+    # Passa os filtros, mesmo que vazios.
     registros, total_paginas = gerar_relatorio_presenca(
         data_inicio, data_fim, turno, turma_completa, aluno, pagina, por_pagina
     )
 
-    # Define os formatos de arquivo disponíveis para download.
+    filtros_usados = {
+        "data_inicio": data_inicio,
+        "data_fim": data_fim,
+        "turno": turno,
+        "turma": turma_completa,
+        "aluno": aluno
+    }
+
+    print("🛠️ Filtros recebidos:", filtros_usados)
+
     formatos = {
         'pdf': ('application/pdf', gerar_pdf, 'pdf'),
         'xlsx': ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', gerar_excel, 'xlsx'),
         'txt': ('text/plain', gerar_txt, 'txt'),
     }
 
-    # Verifica se o formato é válido.
     if formato not in formatos:
-        return "❌ Formato inválido!!", 400
+        return "❌ Formato inválido!", 400
 
-    # Obtém as informações de tipo MIME e função para gerar o relatório no formato escolhido.
     mimetype, funcao, ext = formatos[formato]
-    # Se for PDF, envia os filtros também para o cabeçalho.
-    if formato == 'pdf' or formato == 'xlsx' or formato == 'txt':
-        filtros_usados = {
-            "data_inicio": data_inicio,
-            "data_fim": data_fim,
-            "turno": turno,
-            "turma": turma_completa,
-            "aluno": aluno
-        }
-        buffer = funcao(registros, filtros=filtros_usados)
-    else:
-        buffer = funcao(registros)
 
-    # Retorna o arquivo gerado para download.
-    return send_file(buffer, mimetype=mimetype, as_attachment=True, download_name=f"relatorio.{ext}")
+    # Passando os filtros corretamente para a função de exportação.
+    output = funcao(registros, filtros=filtros_usados)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"relatorio_presencas.{ext}",
+        mimetype=mimetype
+    )
 
 # Rota para renderizar a página de cadastro de alunos.
 @app.route('/cadastro')

@@ -153,10 +153,14 @@ function carregarAlunos(pagina = 1) {
 
       // Atualizar a paginação
       pagination.innerHTML = `
+      <div class="flex flex-wrap justify-center gap-2">
+        ${paginaAtual > 1 ? `<a href="#" onclick="carregarAlunos(1)" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"><< Primeira</a>` : ''}
         ${paginaAtual > 1 ? `<a href="#" onclick="carregarAlunos(${paginaAtual - 1})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Anterior</a>` : ''}
         <span class="py-2 px-4 text-gray-700">Página ${paginaAtual} de ${totalPaginas}</span>
         ${paginaAtual < totalPaginas ? `<a href="#" onclick="carregarAlunos(${paginaAtual + 1})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Próxima</a>` : ''}
-      `;
+        ${paginaAtual < totalPaginas ? `<a href="#" onclick="carregarAlunos(${totalPaginas})" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">Última >></a>` : ''}
+      </div>
+    `;
 
       // 🔧 Atualiza a URL com a página atual, sem recarregar a página.
       const url = new URL(window.location);

@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Ícones Font Awesome. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
+
   <link rel="icon" href="{{ url_for('static', filename='imagens/favicon.png') }}" type="image/png">
 
   <!-- Socket.IO (presente para possível integração em tempo real, embora não usado diretamente aqui). -->
@@ -44,7 +44,6 @@
     <h2 class="text-3xl font-bold text-center mb-8 text-blue-700">
       <i class="fa-solid fa-user mr-2"></i>Lista de Alunos
     </h2>
-    </div>
 
     <!-- Filtros -->
     <form method="get" class="bg-white p-6 rounded-xl shadow-md space-y-6">
@@ -110,28 +109,51 @@
     </div>
 
     <!-- Paginação. -->
-    <div id="pagination" class="flex justify-center mt-4">
-      <div class="flex justify-center items-center gap-4 mt-6">
+    <div id="pagination" class="flex justify-center mt-8">
+      <div class="flex justify-center items-center gap-6">
+        <!-- Botão para a primeira página (<<) -->
         {% if pagina_atual > 1 %}
-        <a href="{{ url_for('alunos', pagina=pagina_atual-1, 
+        <a href="{{ url_for('alunos', pagina=1, 
           turno=request.args.get('turno'), 
           ano=request.args.get('ano'),
           turma=request.args.get('turma'), 
           nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-          Anterior
+          << Primeira </a>
+            {% endif %}
+
+            <!-- Botão para a página anterior -->
+            {% if pagina_atual > 1 %}
+            <a href="{{ url_for('alunos', pagina=pagina_atual-1, 
+          turno=request.args.get('turno'), 
+          ano=request.args.get('ano'),
+          turma=request.args.get('turma'), 
+          nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+              Anterior
+            </a>
+            {% endif %}
+
+            <!-- Exibição da página atual -->
+            <span class="py-2 px-4 text-gray-700">
+              Página {{ pagina_atual }} de {{ total_paginas }}
+            </span>
+
+            <!-- Botão para a próxima página -->
+            {% if pagina_atual < total_paginas %} <a href="{{ url_for('alunos', pagina=pagina_atual+1, 
+          turno=request.args.get('turno'), 
+          ano=request.args.get('ano'),
+          turma=request.args.get('turma'), 
+          nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+              Próxima
         </a>
         {% endif %}
 
-        <span class="py-2 px-4 text-gray-700">
-          Página {{ pagina_atual }} de {{ total_paginas }}
-        </span>
-
-        {% if pagina_atual < total_paginas %} <a href="{{ url_for('alunos', pagina=pagina_atual+1, 
+        <!-- Botão para a última página (>>) -->
+        {% if pagina_atual < total_paginas %} <a href="{{ url_for('alunos', pagina=total_paginas, 
           turno=request.args.get('turno'), 
           ano=request.args.get('ano'),
           turma=request.args.get('turma'), 
           nome=request.args.get('nome')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
-          Próxima
+          Última >>
           </a>
           {% endif %}
       </div>
