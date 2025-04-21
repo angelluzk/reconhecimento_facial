@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function abrirModal(aluno = null, modo = "editar") {
   // Define o título do modal de acordo com o modo.
   document.getElementById("modalTitulo").innerText =
-    modo === "visualizar" ? "Visualizar Aluno" : modo === "editar" ? "Editar Aluno" : "Novo Aluno";
+    modo === "visualizar" ? "Visualizar Aluno(a)" : modo === "editar" ? "Editar Aluno(a)" : "Novo Aluno";
 
   // Preenche os campos com os dados do aluno(a) ou deixa vazio.
   document.getElementById("alunoId").value = aluno?.id || "";

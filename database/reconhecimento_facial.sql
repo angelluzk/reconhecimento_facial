@@ -25,7 +25,7 @@ CREATE TABLE `configuracoes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `configuracoes` (`id`, `nome_configuracao`, `valor`, `tipo`, `descricao`) VALUES
-(1, 'tempo_espera', 3, 'minutos', 'Tempo de espera entre registros de entrada e saída');
+(1, 'tempo_espera', 2, 'minutos', 'Tempo de espera entre registros de entrada e saída');
 
 CREATE TABLE `fotos_alunos` (
   `id_foto` int(11) NOT NULL,

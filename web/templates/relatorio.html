@@ -7,6 +7,9 @@
   <title>Relatório de Presença</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <link rel="icon" href="{{ url_for('static', filename='imagens/favicon.png') }}" type="image/png">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 
@@ -111,13 +114,14 @@
       <table class="min-w-full bg-white rounded-xl shadow">
         <thead class="bg-blue-100 text-blue-800">
           <tr>
-            <th class="py-3 px-4 text-left font-semibold">Aluno(a)</th>
+            <th class="py-3 px-4 text-left font-semibold">Nome do(a) Aluno(a):</th>
             <th class="py-3 px-4 text-left font-semibold">Turma</th>
             <th class="py-3 px-4 text-left font-semibold">Turno</th>
             <th class="py-3 px-4 text-left font-semibold">Data</th>
             <th class="py-3 px-4 text-left font-semibold">Entrada</th>
             <th class="py-3 px-4 text-left font-semibold">Saída</th>
             <th class="py-3 px-4 text-left font-semibold">Duração</th>
+            <th class="py-3 px-4 text-left font-semibold">Status</th>
           </tr>
         </thead>
         <tbody class="text-sm">
@@ -127,7 +131,8 @@
             data-turno="{{ registro['turno'] }}"
             data-data="{{ registro['data']|datetimeformat('%d/%m/%Y') if registro['data'] else '' }}"
             data-entrada="{{ registro['horario_entrada'] or '-' }}" data-saida="{{ registro['horario_saida'] or '-' }}"
-            data-duracao="{{ registro['duracao'] }}" onclick="mostrarDetalhesComDataset(this)">
+            data-duracao="{{ registro['duracao'] }}" data-status="{{ registro['status'] }}"
+            onclick="mostrarDetalhesComDataset(this)">
             <td class="py-2 px-4">{{ registro['aluno'] }}</td>
             <td class="py-2 px-4">{{ registro['turma'] }}</td>
             <td class="py-2 px-4">{{ registro['turno'] }}</td>
@@ -135,6 +140,7 @@
             <td class="py-2 px-4">{{ registro['horario_entrada'] or '-' }}</td>
             <td class="py-2 px-4">{{ registro['horario_saida'] or '-' }}</td>
             <td class="py-2 px-4">{{ registro['duracao'] }}</td>
+            <td class="py-2 px-4">{{ registro['status'] }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -200,15 +206,16 @@
 
   <div id="modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full">
-      <h3 class="text-lg font-bold mb-4">Detalhes do Aluno</h3>
+      <h3 class="text-lg font-bold mb-4">Detalhes do(a) Aluno(a)</h3>
       <div>
-        <p><strong>Aluno:</strong> <span id="modalAluno"></span></p>
+        <p><strong>Aluno(a):</strong> <span id="modalAluno"></span></p>
         <p><strong>Turma:</strong> <span id="modalTurma"></span></p>
         <p><strong>Turno:</strong> <span id="modalTurno"></span></p>
         <p><strong>Data:</strong> <span id="modalData"></span></p>
         <p><strong>Entrada:</strong> <span id="modalEntrada"></span></p>
         <p><strong>Saída:</strong> <span id="modalSaida"></span></p>
         <p><strong>Duração:</strong> <span id="modalDuracao"></span></p>
+        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
       </div>
       <div class="mt-4 flex justify-end">
         <button onclick="fecharModal()"

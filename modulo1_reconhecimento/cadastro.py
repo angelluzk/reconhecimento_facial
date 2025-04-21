@@ -71,97 +71,83 @@ def gerar_embedding(face_img):
 
 # Essa é a função principal que é chamada quando cadastramos um aluno pelo sistema.
 def processar_cadastro_web(nome, ano, turma_letra, turno, imagem_bytes, index):
-    turno = (turno or '').strip() # Limpa o valor do turno (manhã, tarde, integral).
+    turno = (turno or '').strip()
     if not turno:
-        turno = 'integral'  # Se não veio nenhum turno, usamos "integral" por padrão.
+        turno = 'integral'
 
-    turma = f"{ano} {turma_letra}" # Ex: "1º A".
-    nome_formatado = nome.strip().upper() # Ex: "João da Silva" vira "JOÃO DA SILVA".
-    nome_arquivo = nome_para_arquivo(nome_formatado) # Para criar o nome do arquivo de imagem.
+    turma = f"{ano} {turma_letra}"
+    nome_formatado = nome.strip().upper()
+    nome_arquivo = nome_para_arquivo(nome_formatado)
 
     if not imagem_bytes:
         print("⚠️ Nenhuma imagem recebida.")
         return {"sucesso": False, "mensagem": "Imagem vazia recebida."}
 
+    # Se for a primeira imagem, cria o aluno, salva uma única foto
     if index == 1:
-        # Primeira imagem → criar o aluno no banco de dados.
-        caminho_relativo_foto = ""
         conexao = get_db_connection()
         if not conexao:
-            print("❌ Falha ao conectar ao banco de dados no cadastro.")
+            print("❌ Falha ao conectar ao banco de dados.")
             return {"sucesso": False, "mensagem": "Erro ao conectar ao banco de dados."}
 
         cursor = conexao.cursor()
         try:
-            # Insere um novo aluno na tabela.
             cursor.execute("""
                 INSERT INTO alunos (nome, foto, turno, turma)
                 VALUES (%s, %s, %s, %s)
-            """, (nome_formatado, caminho_relativo_foto, turno, turma))
+            """, (nome_formatado, "", turno, turma))  # A foto ainda será vazia, vamos atualizar depois.
             conexao.commit()
-            id_aluno = cursor.lastrowid # Pega o ID que foi gerado para o aluno.
-            id_aluno_cache[nome_formatado] = id_aluno # Salva no cache local.
-
-            print(f"✅ Aluno(a) '{nome_formatado}' cadastrado(a) com sucesso (ID: {id_aluno}).")
+            id_aluno = cursor.lastrowid
+            id_aluno_cache[nome_formatado] = id_aluno
+            print(f"✅ Aluno '{nome_formatado}' cadastrado com ID {id_aluno}")
 
             # Salva a imagem no disco.
             caminho_foto, face_img = salvar_foto_no_disco(id_aluno, nome_arquivo, index, imagem_bytes)
             if caminho_foto:
                 caminho_relativo_foto = os.path.relpath(caminho_foto, FOTOS_DIR).replace("\\", "/")
-                # Atualiza a tabela alunos com o caminho da foto.
+                
                 cursor.execute("""
-                    UPDATE alunos
-                    SET foto = %s
-                    WHERE id = %s
+                    UPDATE alunos SET foto = %s WHERE id = %s
                 """, (caminho_relativo_foto, id_aluno))
                 conexao.commit()
-                print(f"🖼️ Primeira foto registrada na tabela alunos: {caminho_relativo_foto}")
-            else:
-                print("⚠️ Não foi possível salvar a primeira foto no banco de dados.")
+                print(f"🖼️ Foto registrada na tabela alunos: {caminho_relativo_foto}")
+
+                cursor.execute("""
+                    INSERT INTO fotos_alunos (id_aluno, foto_nome)
+                    VALUES (%s, %s)
+                """, (id_aluno, caminho_relativo_foto))
+                conexao.commit()            
 
         except Exception as e:
-            print(f"❌ Erro ao salvar aluno(a): {e}")
+            print(f"❌ Erro ao salvar aluno: {e}")
             conexao.rollback()
-            return {"sucesso": False, "mensagem": "Erro ao salvar aluno(a) no banco."}
+            return {"sucesso": False, "mensagem": "Erro ao salvar aluno."}
         finally:
             cursor.close()
             conexao.close()
     else:
-        # Se não for a primeira imagem, pega o ID do cache.
+        # Se for qualquer outra imagem (index > 1), só gera o embedding, sem salvar a imagem
         id_aluno = id_aluno_cache.get(nome_formatado)
         if not id_aluno:
-            print(f"❌ ID do aluno não encontrado no cache para {nome_formatado}.")
+            print(f"❌ ID não encontrado no cache para {nome_formatado}.")
             return {"sucesso": False, "mensagem": "ID do aluno não encontrado."}
-        
-    # Salva a imagem no disco.
-    caminho_foto, face_img = salvar_foto_no_disco(id_aluno, nome_arquivo, index, imagem_bytes)
 
-    # Gera o embedding da imagem (vetor do rosto) e salva em disco.
+        # Converte a imagem apenas para gerar o embedding
+        try:
+            imagem = Image.open(io.BytesIO(imagem_bytes)).convert("RGB")
+            np_img = np.array(imagem)
+            face_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+        except Exception as e:
+            print(f"[ERRO] Erro ao converter imagem: {e}")
+            return {"sucesso": False, "mensagem": "Erro ao processar imagem para embedding."}
+
+    # Gera o embedding da imagem
     embedding = gerar_embedding(face_img)
     if embedding is not None:
         caminho_embedding = os.path.join(EMBEDDINGS_DIR, f"{id_aluno}_{nome_arquivo}_{index}.npy")
-        np.save(caminho_embedding, embedding) # Salva o vetor num arquivo .npy
+        np.save(caminho_embedding, embedding)
         print(f"\U0001F4BE Embedding {index} salvo em {caminho_embedding}")
     else:
         print(f"⚠️ Embedding não gerado para imagem {index}")
-
-    # Registra a foto na tabela 'fotos_alunos' do banco de dados.
-    if id_aluno and caminho_foto:
-        caminho_relativo_foto = os.path.relpath(caminho_foto, FOTOS_DIR).replace("\\", "/")
-        conexao = get_db_connection()
-        if conexao:
-            try:
-                with conexao.cursor() as cursor:
-                    cursor.execute("""
-                        INSERT INTO fotos_alunos (id_aluno, foto_nome)
-                        VALUES (%s, %s)
-                    """, (id_aluno, caminho_relativo_foto))
-                    conexao.commit()
-                    print(f"🖼️ Foto registrada no banco: {caminho_relativo_foto}")
-            except Exception as e:
-                print(f"❌ Erro ao salvar foto: {e}")
-                conexao.rollback()
-            finally:
-                conexao.close()
 
     return {"sucesso": True, "mensagem": f"Imagem {index} processada com sucesso!"}

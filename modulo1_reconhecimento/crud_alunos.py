@@ -3,10 +3,6 @@
 import os
 from database.connection import get_db_connection
 from datetime import datetime, timedelta
-import threading # É usado para executar tarefas em paralelo.
-import time
-
-cache_dados_aluno = {} # Cria um cache (memória temporária) para guardar o nome e turma dos alunos por um tempo curto (10 segundos).
 
 # Caminho onde ficam salvas as fotos dos alunos.
 FOTOS_DIR = os.path.join(os.path.dirname(__file__), 'fotos_alunos')
@@ -179,40 +175,3 @@ def buscar_nome_e_turma_por_nome(nome_padronizado):
 
     # Retornar o resultado ou um valor padrão.
     return resultado if resultado else {"nome": nome_padronizado, "turma": "Desconhecida"}
-
-# Função que obtém o nome e turma do aluno(a) com o cache de 10 segundos para evitar sobrecarga no banco de dados.
-def obter_dados_aluno_com_cache(nome_padronizado):
-    agora = datetime.now()
-
-    # Verifica se o nome do aluno padronizado já está presente no cache.
-    if nome_padronizado in cache_dados_aluno:
-         # Recupera os dados salvos no cache e o tempo de expiração.
-        dados, expira_em = cache_dados_aluno[nome_padronizado]
-        # Verifica se o cache ainda está válido (ou seja, não expirou).
-        if agora < expira_em:
-            return dados # Retorna os dados do cache diretamente, evitando nova consulta.
-
-    # Busca os dados do aluno (como nome e turma) com base no nome padronizado.
-    dados = buscar_nome_e_turma_por_nome(nome_padronizado)
-    # Armazena os dados no cache, junto com o tempo de expiração (10 segundos a partir de agora).
-    cache_dados_aluno[nome_padronizado] = (dados, agora + timedelta(seconds=10))
-
-    return dados
-
-# Função que limpa os dados expirados do cache a cada 5 segundos.
-def limpar_cache_periodicamente():
-    while True:
-         # Pega o horário atual.
-        agora = datetime.now()
-        # Cria uma lista com os nomes cujos dados já expiraram no cache.
-        expirados = [nome for nome, (_, expira_em) in cache_dados_aluno.items() if agora > expira_em]
-
-        # Remove os dados expirados do cache.
-        for nome in expirados:
-            del cache_dados_aluno[nome]
-
-        # Aguarda 5 segundos antes de repetir o processo.
-        time.sleep(5)
-
-# Inicia o processo de limpeza automática do cache.
-threading.Thread(target=limpar_cache_periodicamente, daemon=True).start()

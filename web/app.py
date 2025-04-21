@@ -27,7 +27,6 @@ app = Flask(__name__)
 # Criação da instância do SocketIO para comunicação em tempo real via WebSockets.
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-
 # Variáveis globais para controle do estado da webcam.
 webcam_ativa = False
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -38,7 +37,7 @@ REQUIRED_DIRS = [
     "modulo1_reconhecimento/embeddings_cache"
 ]
 
-# Verifica a existência de diretórios necessários e os cria, se não existirem,
+# Verifica a existência de diretórios necessários e os cria, se não existirem.
 for path in REQUIRED_DIRS:
     os.makedirs(path, exist_ok=True)
     print(f"📁 Verificado/criado: {path}")
@@ -48,16 +47,21 @@ model = carregar_face_model()
 
 # Define um filtro para formatação de datas no template.
 @app.template_filter('datetimeformat')
-def datetimeformat(value, format='%d/%m/%Y %H:%M:%S'):
+def datetimeformat(value, format='%d/%m/%Y'):
+    from datetime import datetime
+
     try:
-         #Converte um valor para uma string de data formatada.
         if isinstance(value, datetime):
             return value.strftime(format)
         elif isinstance(value, str):
-            return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(format)
-    except:
+            # Tenta converter primeiro com hora.
+            try:
+                return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(format)
+            except ValueError:
+                # Se não tiver hora, tenta só com a data.
+                return datetime.strptime(value, '%Y-%m-%d').strftime(format)
+    except Exception:
         return value
-    return value
 
 # Evento de conexão do SocketIO, indica que o cliente se conectou via WebSocket.
 @socketio.on('connect')
@@ -189,9 +193,14 @@ def baixar_relatorio(formato):
     turma_completa = f"{ano} {turma}".strip() if ano and turma else ''
     aluno = request.args.get('aluno', '')
 
+    # Paginação (opcional, se não precisar de paginação, define None).
+    pagina = request.args.get('pagina', None, type=int)  # Mudei de 1 para None.
+    por_pagina = request.args.get('por_pagina', None, type=int)  # Mudei de 10 para None.
+
     # Chama a função para gerar o relatório de presença com os parâmetros.
-    registros = gerar_relatorio_presenca(
-        data_inicio, data_fim, turno, turma_completa, aluno)[0]
+    registros, total_paginas = gerar_relatorio_presenca(
+        data_inicio, data_fim, turno, turma_completa, aluno, pagina, por_pagina
+    )
 
     # Define os formatos de arquivo disponíveis para download.
     formatos = {
@@ -206,7 +215,18 @@ def baixar_relatorio(formato):
 
     # Obtém as informações de tipo MIME e função para gerar o relatório no formato escolhido.
     mimetype, funcao, ext = formatos[formato]
-    buffer = funcao(registros)
+    # Se for PDF, envia os filtros também para o cabeçalho.
+    if formato == 'pdf' or formato == 'xlsx' or formato == 'txt':
+        filtros_usados = {
+            "data_inicio": data_inicio,
+            "data_fim": data_fim,
+            "turno": turno,
+            "turma": turma_completa,
+            "aluno": aluno
+        }
+        buffer = funcao(registros, filtros=filtros_usados)
+    else:
+        buffer = funcao(registros)
 
     # Retorna o arquivo gerado para download.
     return send_file(buffer, mimetype=mimetype, as_attachment=True, download_name=f"relatorio.{ext}")
@@ -228,7 +248,7 @@ def alunos():
     turma_completa = f"{ano} {turma}".strip() if ano and turma else None
     alunos, total_alunos = listar_alunos(turno=turno, turma=turma_completa, nome=nome, pagina=pagina)
     
-    # Cálculo de total de páginas
+    # Cálculo de total de páginas.
     alunos_por_pagina = 10
     total_paginas = (total_alunos // alunos_por_pagina) + (1 if total_alunos % alunos_por_pagina > 0 else 0)
 

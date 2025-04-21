@@ -9,6 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Ícones Font Awesome. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
+  <link rel="icon" href="{{ url_for('static', filename='imagens/favicon.png') }}" type="image/png">
+
   <!-- Socket.IO (presente para possível integração em tempo real, embora não usado diretamente aqui). -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   <!-- Script JS específico da página de alunos. -->
@@ -93,7 +96,7 @@
         <thead class="bg-blue-100 text-blue-800">
           <tr>
             <th class="py-3 px-4 text-left font-semibold">ID</th>
-            <th class="py-3 px-4 text-left font-semibold">Nome</th>
+            <th class="py-3 px-4 text-left font-semibold">Nome do(a) Aluno(a):</th>
             <th class="py-3 px-4 text-left font-semibold">Turno</th>
             <th class="py-3 px-4 text-left font-semibold">Turma</th>
             <th class="py-3 px-4 text-left font-semibold">Foto</th>
@@ -143,7 +146,7 @@
         <input type="hidden" id="alunoId" />
 
         <div class="mb-4">
-          <label class="block mb-1 text-sm font-medium">Nome</label>
+          <label class="block mb-1 text-sm font-medium">Nome do(a) Aluno(a)</label>
           <input type="text" id="alunoNome" class="w-full border rounded px-3 py-2" required />
         </div>
 

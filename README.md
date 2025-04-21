@@ -128,7 +128,7 @@ pip install -r requisitos.txt
 
 Esse comando irá instalar todas as bibliotecas necessárias, incluindo:
 
-- **Processamento Numérico e Dados**: `numpy`, `pandas`, `openpyxl`, `reportlab`
+- **Processamento Numérico e Dados**: `numpy`, `pandas`, `openpyxl`, `reportlab`, `XlsxWriter`
 - **Visão Computacional**: `opencv-python`, `pillow`
 - **Inteligência Artificial / Deep Learning**: `torch`, `torchvision`, `torchaudio`, `insightface`, `onnxruntime`
 - **Backend Web**: `flask`, `flask-cors`, `flask-socketio`, `eventlet`, `python-dotenv`
@@ -137,7 +137,7 @@ Esse comando irá instalar todas as bibliotecas necessárias, incluindo:
 Caso queira instalar manualmente (não recomendado), aqui estão os comandos divididos por categoria:
 
 ```sh
-pip install numpy==1.24.4 pandas==2.2.1 openpyxl==3.1.2 reportlab==4.1.0
+pip install numpy==1.24.4 pandas==2.2.1 openpyxl==3.1.2 reportlab==4.1.0 XlsxWriter==3.1.2
 
 pip install opencv-python==4.11.0.86 pillow==10.3.0
 

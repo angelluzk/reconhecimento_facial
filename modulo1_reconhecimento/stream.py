@@ -7,8 +7,7 @@ from PIL import Image, ImageDraw, ImageFont # Para desenhar texto no frame com m
 import time # Para controlar intervalos de tempo.
 
 # Importa funções criadas em outros arquivos do projeto.
-from .engine import get_rostos, registrar_ocorrencia, cosine_similarity, face_app, obter_tempo_espera
-from .crud_alunos import obter_dados_aluno_com_cache
+from .engine import get_rostos, registrar_ocorrencia, cosine_similarity, face_app, obter_tempo_espera, obter_info_por_id
 
 # Constantes que definem o tamanho do frame e a taxa de atualização (frames por segundo).
 FRAME_WIDTH = 640 # Largura do vídeo.
@@ -152,8 +151,8 @@ def gerar_frames(socketio):
             if melhor_sim > SIMILARITY_THRESHOLD:
                 # Rosto reconhecido.
                 info_base = infos_dos_rostos[melhor_id]
-                nome_padronizado = info_base["nome"].strip().upper()
-                dados = obter_dados_aluno_com_cache(nome_padronizado)
+                id_aluno = info_base["id"]
+                dados = obter_info_por_id(id_aluno)
                 nome = dados["nome"]
                 turma = dados["turma"]
                 texto_exibicao = f"{nome} ({turma})"

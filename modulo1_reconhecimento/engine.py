@@ -212,7 +212,7 @@ def registrar_ocorrencia(nome_aluno):
 def carregar_face_model():
     return face_app
 
-# Função que busca todas as informações do aluno pelo ID
+# Função que busca todas as informações do aluno pelo ID.
 def obter_info_por_id(id_aluno):
     try:
         conn = get_db_connection()
