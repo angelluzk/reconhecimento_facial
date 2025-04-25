@@ -26,6 +26,7 @@ rostos_conhecidos, infos_dos_rostos = get_rostos()
 # Controle de tempo para evitar registros duplicados em curto período.
 tempo_ultima_ocorrencia = {}
 tempo_ultimo_alerta_desconhecido = datetime.min
+ultimo_alerta_enviado = {}  # controle de alerta por aluno.
 
 # Função que inicia a câmera no índice especificado. Se já estiver ativa, não faz nada.
 def iniciar_camera(index=0):
@@ -90,20 +91,18 @@ def desenhar_texto(frame, texto, posicao, cor=(255, 255, 255), cor_fundo=(0, 0, 
 def gerar_frames(socketio):
     global tempo_ultimo_alerta_desconhecido, camera, streaming
 
-    # Verifica se a transmissão está ativa.
     if not streaming or camera is None or not camera.isOpened():
         print("⏹️ Transmissão não está ativa ou câmera não iniciada.")
         return
 
     tempo_frame_anterior = datetime.now()
     frame_counter = 0
-    frame_interval = 3 # Detecta rostos a cada 3 frames.
+    frame_interval = 3
 
     ultimo_rosto = []
     tempo_ultimo_rosto = datetime.min
 
     while streaming:
-        # Se a câmera for desconectada durante a execução.
         if not camera or not camera.isOpened():
             print("⛔ Câmera foi desligada.")
             break
@@ -117,39 +116,33 @@ def gerar_frames(socketio):
         frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))
         agora = datetime.now()
 
-         # Controla o FPS.
         if (agora - tempo_frame_anterior).total_seconds() < 1.0 / FPS:
             time.sleep(0.01)
             continue
         tempo_frame_anterior = agora
         frame_counter += 1
 
-         # Só detecta rostos a cada "frame_interval" frames.
         if frame_counter % frame_interval == 0:
             rostos_detectados = face_app.get(frame)
             if rostos_detectados:
                 ultimo_rosto = rostos_detectados
                 tempo_ultimo_rosto = agora
         else:
-            # Usa o último rosto detectado, se for recente.
             if (agora - tempo_ultimo_rosto).total_seconds() < 1.0:
                 rostos_detectados = ultimo_rosto
             else:
                 rostos_detectados = []
 
-        # Para cada rosto detectado.
         for rosto in rostos_detectados:
             embedding = rosto.embedding
             bbox = rosto.bbox.astype(int)
             top, left, bottom, right = bbox[1], bbox[0], bbox[3], bbox[2]
 
-            # Compara com os rostos conhecidos.
             similaridades = [cosine_similarity(embedding, ref) for ref in rostos_conhecidos]
             melhor_id = int(np.argmax(similaridades)) if similaridades else -1
             melhor_sim = similaridades[melhor_id] if melhor_id != -1 else 0
 
             if melhor_sim > SIMILARITY_THRESHOLD:
-                # Rosto reconhecido.
                 info_base = infos_dos_rostos[melhor_id]
                 id_aluno = info_base["id"]
                 dados = obter_info_por_id(id_aluno)
@@ -159,22 +152,28 @@ def gerar_frames(socketio):
                 cor = (0, 255, 0)
 
                 tempo_espera = obter_tempo_espera()
+                mensagem = None
+                tipo = None
+
                 if nome in tempo_ultima_ocorrencia and (agora - tempo_ultima_ocorrencia[nome]) < timedelta(minutes=tempo_espera):
-                    mensagem = f"⏳ {texto_exibicao} já registrado(a) recentemente! Ignorado..."
-                    tipo = "info"
+                    if ultimo_alerta_enviado.get(nome) != "ignorado":
+                        mensagem = f"⏳ {texto_exibicao} já registrado(a) recentemente! Ignorado..."
+                        tipo = "info"
+                        ultimo_alerta_enviado[nome] = "ignorado"
                 else:
                     nome_padronizado = nome.strip().upper()
                     tipo_registro, mensagem = registrar_ocorrencia(nome_padronizado)
                     tempo_ultima_ocorrencia[nome] = agora
                     tipo = tipo_registro if tipo_registro in ["entrada", "saida"] else "info"
+                    ultimo_alerta_enviado[nome] = tipo
 
-                socketio.emit('alerta', {
-                    'mensagem': mensagem,
-                    'nome': texto_exibicao,
-                    'tipo': tipo
-                }, namespace='/')
+                if mensagem:
+                    socketio.emit('alerta', {
+                        'mensagem': mensagem,
+                        'nome': texto_exibicao,
+                        'tipo': tipo
+                    }, namespace='/')
             else:
-                # Rosto desconhecido.
                 texto_exibicao = "Desconhecido"
                 cor = (0, 0, 255)
                 if (agora - tempo_ultimo_alerta_desconhecido) > timedelta(seconds=5):
@@ -185,12 +184,10 @@ def gerar_frames(socketio):
                     }, namespace='/')
                     tempo_ultimo_alerta_desconhecido = agora
 
-            # Desenha a caixa e o nome no frame.
             cv2.rectangle(frame, (left, top), (right, bottom), cor, 2)
             meio_caixa = (left + right) // 2
             frame = desenhar_texto(frame, texto_exibicao, (meio_caixa, bottom + 10))
 
-        # Codifica o frame final como imagem jpg para enviar ao navegador.
         _, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
 

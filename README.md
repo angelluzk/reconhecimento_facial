@@ -35,7 +35,7 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
 
 ## 🚀 Tecnologias Utilizadas
 
-<div style="display: flex" align="left">
+<div align="left" style="display: flex; flex-wrap: wrap; gap: 10px;">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="35" title="HTML5" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" height="35" title="CSS3" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="35" title="JavaScript" />
@@ -46,22 +46,48 @@ Este projeto tem como objetivo registrar a entrada e saída de alunos automatica
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" height="35" title="PyTorch" />
 </div>
 
-<br/>
+---
 
-> 🔧 Outras ferramentas, bibliotecas e dependências:
-> - **InsightFace**
-> - **SocketIO**
-> - **Eventlet**
-> - **Flask** 
-> - **Flask-CORS**  
-> - **python-dotenv**  
-> - **PyMySQL / mysql-connector-python / MySQLClient**  
-> - **Pillow**  
-> - **OpenPyXL**  
-> - **ReportLab**  
-> - **TorchVision / TorchAudio**  
-> - **FontAwesome**  
-> - **Tailwind CSS**
+### 🧠 Inteligência Artificial & Reconhecimento Facial
+- [PyTorch](https://pytorch.org/) – framework de machine learning usado para redes neurais
+- [TorchVision](https://pytorch.org/vision/) / [TorchAudio](https://pytorch.org/audio/) – suporte a visão computacional e áudio
+- [InsightFace](https://github.com/deepinsight/insightface) – biblioteca para reconhecimento facial baseado em embeddings
+- [ONNX Runtime](https://onnxruntime.ai/) – execução eficiente de modelos pré-treinados (CPU ou GPU)
+
+### 🖼️ Processamento de Imagens
+- [OpenCV](https://opencv.org/) – manipulação de imagens e captura de vídeo
+- [Pillow](https://python-pillow.org/) – processamento e salvamento de imagens
+
+### 📊 Manipulação de Dados e Relatórios
+- [NumPy](https://numpy.org/) – arrays numéricos de alto desempenho
+- [Pandas](https://pandas.pydata.org/) – manipulação e análise de dados
+- [OpenPyXL](https://openpyxl.readthedocs.io/) – criação e leitura de arquivos Excel (.xlsx)
+- [XlsxWriter](https://xlsxwriter.readthedocs.io/) – geração avançada de planilhas Excel
+- [ReportLab](https://www.reportlab.com/) – geração de arquivos PDF
+
+### 🌐 Backend e Comunicação em Tempo Real
+- [Flask](https://flask.palletsprojects.com/) – microframework web para Python
+- [Flask-SocketIO](https://flask-socketio.readthedocs.io/) – comunicação WebSocket em tempo real
+- [Flask-CORS](https://flask-cors.readthedocs.io/) – suporte a CORS
+- [python-socketio](https://python-socketio.readthedocs.io/) – cliente e servidor WebSocket
+- [python-engineio](https://python-engineio.readthedocs.io/) – motor de transporte para SocketIO
+- [python-dotenv](https://pypi.org/project/python-dotenv/) – carregamento de variáveis de ambiente via `.env`
+
+### 🐬 Banco de Dados MySQL
+- [PyMySQL](https://pymysql.readthedocs.io/)
+- [mysqlclient](https://github.com/PyMySQL/mysqlclient)
+- [mysql-connector-python](https://dev.mysql.com/doc/connector-python/en/)
+
+### 🎨 Frontend e Estilização
+- [HTML5](https://developer.mozilla.org/pt-BR/docs/Web/HTML)
+- [CSS3](https://developer.mozilla.org/pt-BR/docs/Web/CSS)
+- [JavaScript](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
+- [Tailwind CSS](https://tailwindcss.com/) – framework CSS utilitário
+- [FontAwesome](https://fontawesome.com/) – ícones para web
+
+### 🛠️ Empacotamento e Build
+- [auto-py-to-exe](https://github.com/brentvollebregt/auto-py-to-exe) – geração de executáveis com interface gráfica
+- [setuptools](https://pypi.org/project/setuptools/) / [wheel](https://pypi.org/project/wheel/) – empacotamento de dependências
 
 ---
 
@@ -131,7 +157,7 @@ Esse comando irá instalar todas as bibliotecas necessárias, incluindo:
 - **Processamento Numérico e Dados**: `numpy`, `pandas`, `openpyxl`, `reportlab`, `XlsxWriter`
 - **Visão Computacional**: `opencv-python`, `pillow`
 - **Inteligência Artificial / Deep Learning**: `torch`, `torchvision`, `torchaudio`, `insightface`, `onnxruntime`
-- **Backend Web**: `flask`, `flask-cors`, `flask-socketio`, `eventlet`, `python-dotenv`
+- **Backend Web**: `flask`, `flask-cors`, `flask-socketio`, `python-socketio`, `python-engineio`, `python-dotenv`
 - **Banco de Dados MySQL**: `pymysql`, `mysqlclient`, `mysql-connector-python`
 
 Caso queira instalar manualmente (não recomendado), aqui estão os comandos divididos por categoria:
@@ -152,11 +178,13 @@ pip install onnxruntime==1.21.0
 # Requer CUDA configurado corretamente
 pip install onnxruntime-gpu==1.21.0
 
-pip install flask==3.1.0 flask-cors==5.0.1 flask-socketio==5.3.0 eventlet==0.33.0 python-dotenv==1.0.1
+pip install flask==3.1.0 flask-cors==5.0.1 flask-socketio==5.3.0 python-dotenv==1.0.1 python-socketio==5.5.2 python-engineio==4.3.2
 
-pip install pymysql==1.0.2 mysqlclient==2.2.0 mysql-connector-python==9.2.0
+pip install pymysql==1.0.2
+pip install mysqlclient==2.2.0
+pip install mysql-connector-python==9.2.0
 
-pip install setuptools>=69.5.1 wheel>=0.43.0
+pip install "setuptools>=69.5.1" "wheel>=0.43.0"
 ```
 
 ---
@@ -179,41 +207,56 @@ Para que o sistema funcione corretamente, é necessário ter o **MySQL** instala
 Com o MySQL instalado e em execução, abra o terminal do MySQL e execute os comandos abaixo para criar o banco de dados e suas respectivas tabelas:
 
 ```sql
-CREATE DATABASE reconhecimento_facial;
+CREATE DATABASE IF NOT EXISTS reconhecimento_facial
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE reconhecimento_facial;
 
+-- Tabela de alunos
 CREATE TABLE `alunos` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nome` varchar(255) NOT NULL,
   `foto` varchar(255) NOT NULL,
   `turno` enum('manhã','tarde','integral') NOT NULL DEFAULT 'integral',
-  `turma` varchar(10) NOT NULL
+  `turma` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabela de configurações
 CREATE TABLE `configuracoes` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nome_configuracao` varchar(255) NOT NULL,
   `valor` int(11) NOT NULL,
   `tipo` enum('minutos','horas') NOT NULL DEFAULT 'minutos',
-  `descricao` varchar(255) NOT NULL
+  `descricao` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `configuracoes` (`id`, `nome_configuracao`, `valor`, `tipo`, `descricao`) VALUES
-(1, 'tempo_espera', 3, 'minutos', 'Tempo de espera entre registros de entrada e saída');
+-- Inserindo configuração inicial
+INSERT INTO `configuracoes` (`nome_configuracao`, `valor`, `tipo`, `descricao`) VALUES
+('tempo_espera', 3, 'minutos', 'Tempo de espera entre registros de entrada e saída');
 
+-- Tabela de fotos dos alunos
 CREATE TABLE `fotos_alunos` (
-  `id_foto` int(11) NOT NULL,
+  `id_foto` int(11) NOT NULL AUTO_INCREMENT,
   `id_aluno` int(11) NOT NULL,
-  `foto_nome` varchar(255) NOT NULL
+  `foto_nome` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_foto`),
+  KEY `id_aluno` (`id_aluno`),
+  CONSTRAINT `fotos_alunos_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabela de registros de presença
 CREATE TABLE `registros_presenca` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_aluno` int(11) DEFAULT NULL,
   `tipo_registro` enum('entrada','saida') NOT NULL,
   `data_hora` timestamp NOT NULL DEFAULT current_timestamp(),
-  `turma` varchar(10) NOT NULL
+  `turma` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_aluno` (`id_aluno`),
+  CONSTRAINT `registros_presenca_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 ---

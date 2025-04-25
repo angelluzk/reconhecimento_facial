@@ -14,9 +14,9 @@ from flask_socketio import SocketIO
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importação de funções específicas de outros módulos.
+from database.connection import get_db_connection
 from modulo1_reconhecimento.controle_tempo import obter_configuracao_tempo, atualizar_configuracao_tempo
 from modulo1_reconhecimento.crud_alunos import listar_alunos, atualizar_aluno, excluir_aluno
-from database.connection import get_db_connection
 from modulo1_reconhecimento.cadastro import processar_cadastro_web
 from modulo1_reconhecimento.stream import gerar_frames, recarregar_embeddings, iniciar_camera, liberar_camera
 from modulo1_reconhecimento.relatorios import gerar_relatorio_presenca, gerar_pdf, gerar_excel, gerar_txt
@@ -24,11 +24,12 @@ from modulo1_reconhecimento.engine import carregar_face_model
 
 # Criação da instância do aplicativo Flask.
 app = Flask(__name__)
-# Criação da instância do SocketIO para comunicação em tempo real via WebSockets.
+# Verifique se a opção 'threading' está corretamente configurada
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # Variáveis globais para controle do estado da webcam.
 webcam_ativa = False
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FOTOS_ALUNOS_DIR = os.path.join(
     BASE_DIR, "modulo1_reconhecimento", "fotos_alunos")
@@ -48,8 +49,6 @@ model = carregar_face_model()
 # Define um filtro para formatação de datas no template.
 @app.template_filter('datetimeformat')
 def datetimeformat(value, format='%d/%m/%Y'):
-    from datetime import datetime
-
     try:
         if isinstance(value, datetime):
             return value.strftime(format)
@@ -82,26 +81,6 @@ def video_feed():
         return Response(gerar_frames(socketio), mimetype='multipart/x-mixed-replace; boundary=frame')
     return '', 204
 
-# Rota para obter o tempo de espera da configuração.
-@app.route('/api/tempo-espera', methods=['GET'])
-def get_tempo_espera():
-    config = obter_configuracao_tempo()
-    if config:
-        return jsonify({"valor": int(config["valor"]), "tipo": config["tipo"]})
-    return jsonify({"error": "Configuração não encontrada"}), 404
-
-# Rota para definir o tempo de espera da configuração.
-@app.route('/api/tempo-espera', methods=['POST'])
-def set_tempo_espera():
-    data = request.get_json()
-    valor = data.get("valor")
-    tipo = data.get("tipo")
-    # Valida os dados recebidos antes de atualizar a configuração.
-    if valor and tipo in ["minutos", "horas"]:
-        atualizar_configuracao_tempo(valor, tipo)
-        return jsonify({"message": "Configuração atualizada com sucesso"})
-    return jsonify({"error": "Dados inválidos"}), 400
-
 # Rota para alternar o estado da webcam (ligar/desligar).
 @app.route('/toggle_stream', methods=['POST'])
 def toggle_stream():
@@ -133,6 +112,26 @@ def desligar_camera():
     except Exception as e:
         print(f"❌ Erro ao desligar webcam: {e}")
         return jsonify({'erro': 'Erro ao desligar webcam'}), 500
+
+# Rota para obter o tempo de espera da configuração.
+@app.route('/api/tempo-espera', methods=['GET'])
+def get_tempo_espera():
+    config = obter_configuracao_tempo()
+    if config:
+        return jsonify({"valor": int(config["valor"]), "tipo": config["tipo"]})
+    return jsonify({"error": "Configuração não encontrada"}), 404
+
+# Rota para definir o tempo de espera da configuração.
+@app.route('/api/tempo-espera', methods=['POST'])
+def set_tempo_espera():
+    data = request.get_json()
+    valor = data.get("valor")
+    tipo = data.get("tipo")
+    # Valida os dados recebidos antes de atualizar a configuração.
+    if valor and tipo in ["minutos", "horas"]:
+        atualizar_configuracao_tempo(valor, tipo)
+        return jsonify({"message": "Configuração atualizada com sucesso"})
+    return jsonify({"error": "Dados inválidos"}), 400
 
 # Rota para gerar relatórios, com filtros de data, turno, ano, turma e aluno.
 @app.route('/relatorios')

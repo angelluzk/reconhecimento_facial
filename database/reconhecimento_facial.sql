@@ -25,7 +25,7 @@ CREATE TABLE `configuracoes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `configuracoes` (`id`, `nome_configuracao`, `valor`, `tipo`, `descricao`) VALUES
-(1, 'tempo_espera', 2, 'minutos', 'Tempo de espera entre registros de entrada e saída');
+(1, 'tempo_espera', 3, 'minutos', 'Tempo de espera entre registros de entrada e saída');
 
 CREATE TABLE `fotos_alunos` (
   `id_foto` int(11) NOT NULL,
@@ -71,10 +71,10 @@ ALTER TABLE `registros_presenca`
 
 
 ALTER TABLE `fotos_alunos`
-  ADD CONSTRAINT `fotos_alunos_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fotos_alunos_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `registros_presenca`
-  ADD CONSTRAINT `registros_presenca_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`);
+  ADD CONSTRAINT `registros_presenca_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `alunos` (`id`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
