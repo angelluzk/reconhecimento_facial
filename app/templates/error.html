@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}Erro{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center p-6">
+  <div class="max-w-md w-full bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+    <h3 class="font-semibold text-xl">Ocorreu um erro!</h3>
+    <p>{{ mensagem }}</p>
+  </div>
+</div>
+{% endblock %}

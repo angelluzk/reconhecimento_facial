@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard | Admin{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+  <i class="fas fa-chart-line mr-4 text-3xl hover:text-blue-500"></i> Visão Geral do Sistema
+</h2>
+
+<!-- Cards principais -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+  {% set cards = [
+    {'icon': 'fa-users', 'color': 'text-blue-500', 'valor': total_alunos, 'descricao': 'Alunos Cadastrados'},
+    {'icon': 'fa-user-check', 'color': 'text-green-500', 'valor': alunos_ativos, 'descricao': 'Alunos Ativos'},
+    {'icon': 'fa-user-clock', 'color': 'text-yellow-500', 'valor': faltas_recent, 'descricao': 'Faltas Recentes'},
+    {'icon': 'fa-chart-line', 'color': 'text-purple-500', 'valor': taxa_reconhecimento ~ '%', 'descricao': 'Taxa de Reconhecimento'},
+    {'icon': 'fa-door-open', 'color': 'text-indigo-500', 'valor': entradas_hoje, 'descricao': 'Entradas Hoje'},
+    {'icon': 'fa-door-closed', 'color': 'text-red-500', 'valor': saidas_hoje, 'descricao': 'Saídas Hoje'},
+    {'icon': 'fa-school', 'color': 'text-pink-500', 'valor': total_turmas, 'descricao': 'Turmas Cadastradas'},
+    {'icon': 'fa-clock', 'color': 'text-cyan-500', 'valor': tempo_medio_presenca ~ ' min', 'descricao': 'Tempo Médio na Escola'},
+  ] %}
+  {% for c in cards %}
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 flex flex-col items-center text-center">
+    <i class="fas {{ c.icon }} {{ c.color }} text-4xl mb-3"></i>
+    <div class="text-2xl font-bold text-gray-800 dark:text-white">{{ c.valor }}</div>
+    <div class="text-sm text-gray-500 dark:text-gray-400">{{ c.descricao }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Gráficos -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+      <i class="fas fa-calendar-week mr-2 text-blue-400"></i>Presença por Semana
+    </h3>
+    <canvas id="graficoPresenca" height="100"></canvas>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+      <i class="fas fa-clock mr-2 text-cyan-400"></i>Distribuição por Turno
+    </h3>
+    <canvas id="graficoTurno"></canvas>
+  </div>
+</div>
+
+<!-- Últimos registros -->
+<div class="bg-white dark:bg-gray-800 mt-10 p-6 rounded-2xl shadow-md">
+  <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+    <i class="fas fa-list-alt mr-2 text-teal-400"></i>Últimos Registros de Presença
+  </h3>
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full text-sm">
+      <thead>
+        <tr class="bg-gray-100 dark:bg-gray-700 text-left text-gray-600 dark:text-gray-300">
+          <th class="px-4 py-2">Aluno</th>
+          <th class="px-4 py-2">Tipo</th>
+          <th class="px-4 py-2">Data e Hora</th>
+          <th class="px-4 py-2">Turma</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in ultimos_registros %}
+        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+          <td class="px-4 py-2">{{ r.nome }}</td>
+          <td class="px-4 py-2">{{ r.tipo_registro }}</td>
+          <td class="px-4 py-2">{{ r.data_hora }}</td>
+          <td class="px-4 py-2">{{ r.turma }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Galeria de fotos -->
+<div class="bg-white dark:bg-gray-800 mt-10 p-6 rounded-2xl shadow-md">
+  <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+    <i class="fas fa-camera mr-2 text-purple-400"></i>Alunos Reconhecidos Recentemente
+  </h3>
+  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+    {% for aluno in fotos_recentes %}
+    <div class="text-center">
+      <img src="{{ aluno.foto_url }}" alt="Foto"
+           class="w-20 h-20 rounded-full mx-auto mb-2 object-cover shadow-md border border-gray-300 dark:border-gray-700">
+      <div class="text-sm text-gray-800 dark:text-white">{{ aluno.nome }}</div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">{{ aluno.turma }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Informações da configuração -->
+<div class="mt-8 text-sm text-gray-500 dark:text-gray-400 text-center">
+  <i class="fas fa-cog mr-1"></i> Tempo mínimo entre registros de presença:
+  <strong>{{ tempo_espera }} {{ tipo_espera }}</strong>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  window.graficoPresencaLabels = JSON.parse('{{ grafico_presenca_labels | tojson }}');
+  window.graficoPresencaDados = JSON.parse('{{ grafico_presenca_dados | tojson }}');
+  window.graficoTurnoLabels = JSON.parse('{{ grafico_turno_labels | tojson }}');
+  window.graficoTurnoDados = JSON.parse('{{ grafico_turno_dados | tojson }}');
+</script>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

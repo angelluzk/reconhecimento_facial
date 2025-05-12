@@ -1,0 +1,248 @@
+{% extends 'layout.html' %}
+
+{% block title %}Relatório de Presença | Admin{% endblock %}
+
+{% block content %}
+<div class="flex flex-col min-h-screen">
+  <main class="flex-1 w-full px-6">
+    <h2 class="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+      <i class="fas fa-clipboard-list mr-4 text-3xl hover:text-blue-500"></i>Relatório de Presença - Entrada e Saída de
+      Alunos
+    </h2>
+
+    <div class="flex justify-end mt-5 mb-4">
+      <button id="btnAbrirCadastro"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+        <i class="fa-solid fa-video mr-2"></i> Tela de Reconhecimento Facial
+      </button>
+    </div>
+
+    <form method="get" class="bg-white p-6 rounded-xl shadow-md space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="font-semibold block mb-1">Data Início:</label>
+          <div class="flex items-center border border-gray-300 rounded-md">
+            <i class="fas fa-calendar-day px-3 text-gray-500"></i>
+            <input type="date" name="data_inicio" value="{{ request.args.get('data_inicio', '') }}"
+              class="w-full border-none px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+          </div>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Data Fim:</label>
+          <div class="flex items-center border border-gray-300 rounded-md">
+            <i class="fas fa-calendar-check px-3 text-gray-500"></i>
+            <input type="date" name="data_fim" value="{{ request.args.get('data_fim', '') }}"
+              class="w-full border-none px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="font-semibold block mb-1">Ano:</label>
+          <div class="flex items-center border border-gray-300 rounded-md">
+            <i class="fas fa-calendar-alt px-3 text-gray-500"></i>
+            <select name="ano" class="w-full border-none px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+              <option value="" disabled selected>Selecione o Ano...</option>
+              <option value="1º" {% if request.args.get('ano')=='1º' %}selected{% endif %}>1º Ano</option>
+              <option value="2º" {% if request.args.get('ano')=='2º' %}selected{% endif %}>2º Ano</option>
+              <option value="3º" {% if request.args.get('ano')=='3º' %}selected{% endif %}>3º Ano</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Turma:</label>
+          <div class="flex items-center border border-gray-300 rounded-md">
+            <i class="fas fa-users px-3 text-gray-500"></i>
+            <select name="turma" class="w-full border-none px-3 py-2 rounded-md focus:ring focus:border-blue-400">
+              <option value="" disabled selected>Selecione a Turma...</option>
+              {% for t in ['A','B','C','D','E','F'] %}
+              <option value="{{ t }}" {% if request.args.get('turma')==t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="font-semibold block mb-1">Aluno:</label>
+        <div class="flex items-center border border-gray-300 rounded-md">
+          <i class="fas fa-user px-3 text-gray-500"></i>
+          <input type="text" name="aluno" value="{{ request.args.get('aluno', '') }}"
+            class="w-full border-none px-3 py-2 rounded-md focus:ring focus:border-blue-400" />
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" name="semana_atual" value="1" id="semana_atual" class="accent-blue-600" {% if
+          request.args.get('semana_atual') %}checked{% endif %}>
+        <label for="semana_atual" class="font-medium"><i class="fas fa-calendar-week mr-2 text-gray-500"></i>Mostrar
+          registros da semana atual</label>
+      </div>
+
+      <div class="text-center flex flex-wrap justify-center gap-4 pt-4">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+          <i class="fas fa-search mr-2"></i>Gerar Relatório
+        </button>
+        <a href="{{ url_for('relatorios.relatorios') }}"
+          class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-8 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+          <i class="fas fa-eraser mr-2"></i>Limpar Filtros
+        </a>
+      </div>
+    </form>
+
+    {% if registros %}
+    <div class="overflow-x-auto mt-10">
+      <table class="min-w-full bg-white rounded-xl shadow">
+        <thead class="bg-blue-100 text-blue-800">
+          <tr>
+            <th class="py-3 px-4 text-left font-semibold">Nome</th>
+            <th class="py-3 px-4 text-left font-semibold">Turma</th>
+            <th class="py-3 px-4 text-left font-semibold">Turno</th>
+            <th class="py-3 px-4 text-left font-semibold">Data</th>
+            <th class="py-3 px-4 text-left font-semibold">Entrada</th>
+            <th class="py-3 px-4 text-left font-semibold">Saída</th>
+            <th class="py-3 px-4 text-left font-semibold">Duração</th>
+            <th class="py-3 px-4 text-left font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          {% for registro in registros %}
+          <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="mostrarDetalhesComDataset(this)"
+            data-aluno="{{ registro['aluno'] }}" data-turma="{{ registro['turma'] }}"
+            data-turno="{{ registro['turno'] }}" data-data="{{ registro['data']|formatar_data }}"
+            data-entrada="{{ registro['horario_entrada'] or '-' }}" data-saida="{{ registro['horario_saida'] or '-' }}"
+            data-duracao="{{ registro['duracao'] }}" data-status="{{ registro['status'] }}">
+            <td class="py-2 px-4">{{ registro['aluno'] }}</td>
+            <td class="py-2 px-4">{{ registro['turma'] }}</td>
+            <td class="py-2 px-4">{{ registro['turno'] }}</td>
+            <td class="py-2 px-4">{{ registro['data']|formatar_data }}</td>
+            <td class="py-2 px-4">{{ registro['horario_entrada'] or '-' }}</td>
+            <td class="py-2 px-4">{{ registro['horario_saida'] or '-' }}</td>
+            <td class="py-2 px-4">{{ registro['duracao'] }}</td>
+            <td class="py-2 px-4">{{ registro['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex justify-center items-center gap-4 mt-6">
+      {% if pagina_atual > 1 %}
+      <a href="{{ url_for('relatorios.relatorios', pagina=1, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+        << Início </a>
+          {% endif %}
+
+          {% if pagina_atual > 1 %}
+          <a href="{{ url_for('relatorios.relatorios', pagina=pagina_atual-1, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+            < Anterior </a>
+              {% endif %}
+
+              <span class="py-2 px-4 text-gray-700"> Página {{ pagina_atual }} de {{ total_paginas }}
+              </span>
+
+              {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios.relatorios', pagina=pagina_atual+1, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+                Próxima >
+          </a>
+          {% endif %}
+
+          {% if pagina_atual < total_paginas %} <a href="{{ url_for('relatorios.relatorios', pagina=total_paginas, 
+      data_inicio=request.args.get('data_inicio'), 
+      data_fim=request.args.get('data_fim'), 
+      turno=request.args.get('turno'), 
+      ano=request.args.get('ano'),
+      turma=request.args.get('turma'), 
+      aluno=request.args.get('aluno')) }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+            Última >>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="text-center mt-10">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Exportar como:</h3>
+      <div class="flex flex-wrap justify-center gap-4">
+
+        <form action="{{ url_for('relatorios.baixar_relatorio', formato='pdf') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
+          <button type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+            <i class="fas fa-file-pdf"></i>PDF
+          </button>
+        </form>
+
+        <form action="{{ url_for('relatorios.baixar_relatorio', formato='xlsx') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
+          <button type="submit"
+            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+            <i class="fas fa-file-excel"></i>Excel
+          </button>
+        </form>
+
+        <form action="{{ url_for('relatorios.baixar_relatorio', formato='txt') }}" method="get">
+          {% for nome, valor in request.args.items() %}
+          <input type="hidden" name="{{ nome }}" value="{{ valor }}">
+          {% endfor %}
+          <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow flex items-center gap-2 transition">
+            <i class="fas fa-file-alt"></i>TXT
+          </button>
+        </form>
+
+      </div>
+      {% if registros|length == 0 %}
+      <p class="text-center text-gray-600 mt-10">Nenhum registro encontrado!</p>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <p class="text-center text-gray-600 mt-10">Nenhum registro encontrado!</p>
+    {% endif %}
+  </main>
+</div>
+
+<div id="modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg p-6 max-w-md w-full">
+    <h3 class="text-lg font-bold mb-4">Detalhes do Aluno</h3>
+    <div class="space-y-2">
+      <p><strong>Aluno:</strong> <span id="modalAluno"></span></p>
+      <p><strong>Turma:</strong> <span id="modalTurma"></span></p>
+      <p><strong>Turno:</strong> <span id="modalTurno"></span></p>
+      <p><strong>Data:</strong> <span id="modalData"></span></p>
+      <p><strong>Entrada:</strong> <span id="modalEntrada"></span></p>
+      <p><strong>Saída:</strong> <span id="modalSaida"></span></p>
+      <p><strong>Duração:</strong> <span id="modalDuracao"></span></p>
+      <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+    </div>
+    <div class="text-right mt-4">
+      <button onclick="fecharModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Fechar</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/relatorio.js') }}"></script>
+{% endblock %}

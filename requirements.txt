@@ -1,0 +1,43 @@
+# 📊 Manipulação de dados e relatórios
+numpy==1.24.4
+pandas==2.2.1
+openpyxl==3.1.2
+reportlab==4.1.0
+XlsxWriter==3.1.2
+
+# 🖼️ Processamento de imagem
+opencv-python==4.8.0.76
+pillow==10.3.0
+
+# 🔥 PyTorch e Reconhecimento Facial
+torch==2.2.1
+torchvision==0.17.1
+torchaudio==2.2.1
+insightface==0.7.3
+
+# ⚙️ ONNX Runtime
+onnxruntime==1.21.0
+
+# 🌐 Backend Flask + WebSocket (Gevent)
+flask==3.1.0
+flask-cors==5.0.1
+flask-socketio==5.3.0
+gevent==21.12.0
+gevent-websocket==0.10.1
+python-socketio==5.5.2
+python-engineio==4.3.2
+python-dotenv==1.0.1
+
+# 📅 Agendador de tarefas
+apscheduler==3.10.4
+
+# 🐬 Conector MySQL (usando mysql-connector-python)
+mysql-connector-python==8.0.33
+
+# 🛠️ Build e empacotamento
+setuptools==69.5.1
+wheel==0.43.0
+pyinstaller==6.5.0
+
+# 🚀 Servidor WSGI para ambientes de produção com Flask
+gunicorn==21.2.0

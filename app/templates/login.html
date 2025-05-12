@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Painel Administrativo</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='imagens/favicon.png') }}" type="image/png" />
+</head>
+
+<body class="h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-300">
+  <div class="flex justify-center items-center h-full px-4">
+    <div class="w-full max-w-sm bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl transition-all duration-300">
+      <div class="text-center mb-8">
+        <img src="{{ url_for('static', filename='imagens/favicon.png') }}" alt="Logo" class="mx-auto h-16 mb-4 drop-shadow-md">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Bem-vindo!</h2>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">Faça login para acessar o Painel Administrativo.</p>
+      </div>
+
+      <form action="{{ url_for('login_routes.login') }}" method="POST" id="login-form">
+        <div class="mb-5">
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">E-mail:</label>
+          <input type="email" name="email" id="email" required
+            class="w-full px-4 py-2 mt-1 rounded-lg border dark:border-gray-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition duration-200" />
+        </div>
+
+        <div class="mb-5">
+          <label for="senha" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha:</label>
+          <input type="password" name="senha" id="senha" required
+            class="w-full px-4 py-2 mt-1 rounded-lg border dark:border-gray-600 focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition duration-200" />
+        </div>
+
+        <div class="flex justify-between items-center mb-6 text-sm">
+          <label class="inline-flex items-center text-gray-600 dark:text-gray-400">
+            <input type="checkbox" name="lembrar-me" class="form-checkbox mr-2 text-blue-600">
+            Lembrar-me
+          </label>
+          <a href="{{ url_for('login_routes.esqueci_senha') }}" class="text-blue-500 hover:underline">Esqueceu a senha?</a>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg shadow-md transition duration-300">
+          Entrar
+        </button>
+      </form>
+
+      <div class="mt-6 text-center text-sm">
+        <p class="text-gray-600 dark:text-gray-400">
+          Não tem conta?
+          <a href="{{ url_for('login_routes.cadastro_admin') }}" class="text-blue-500 hover:underline">Criar conta</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

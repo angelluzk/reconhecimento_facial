@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Cadastro de Alunos - Sistema Escolar</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Inter:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='imagens/favicon.png') }}" type="image/png">
+</head>
+
+<body class="bg-gray-100 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <nav class="bg-blue-800 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-9">
+      <div class="flex justify-between items-center h-20">
+        <div class="flex items-center space-x-4">
+          <img src="{{ url_for('static', filename='imagens/favicon_fem.png') }}" alt="Logo" class="h-10 w-10">
+          <span class="text-xl font-semibold">Sistema Escolar - Cadastro de Novos Alunos</span>
+        </div>
+        <div class="relative">
+          <button id="user-icon" class="text-white hover:text-blue-300">
+            <i class="fas fa-user-circle text-3xl"></i>
+          </button>
+          <div id="user-menu"
+            class="hidden absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-50 text-gray-700">
+            <a href="#" id="btnLogout" class="block px-4 py-2 hover:bg-gray-100 transition">
+              <i class="fas fa-sign-out-alt mr-2"></i> Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="bg-white shadow-sm py-4 px-6 border-b border-gray-200 flex flex-wrap justify-end gap-4">
+    <a href="{{ url_for('face_recognition.recognition') }}"
+      class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition text-sm font-medium flex items-center gap-2 transition ease-in-out duration-300 transform hover:scale-105">
+      <i class="fas fa-home"></i> Início
+    </a>
+    <a href="{{ url_for('relatorios.relatorios') }}"
+      class="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition text-sm font-medium flex items-center gap-2 transition ease-in-out duration-300 transform hover:scale-105">
+      <i class="fas fa-chart-bar"></i> Relatórios de Presença
+    </a>
+  </div>
+
+  <main class="container mx-auto px-4 py-10 flex-1">
+    <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-3xl mx-auto space-y-8">
+      <h2 class="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        <i class="fas fa-user-plus mr-4 text-3xl hover:text-blue-500"></i>Cadastrar Novo Aluno
+      </h2>
+
+      <form id="cadastro-form" class="space-y-6 relative">
+        <input type="hidden" name="turno" value="integral">
+
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500">
+            <i class="fa-solid fa-user"></i>
+          </span>
+          <input type="text" name="nome" placeholder="Nome completo do aluno" required
+            class="w-full pl-10 pr-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition uppercase" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-blue-700 font-semibold mb-2">Ano:</label>
+            <div class="space-y-2">
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="1º" required class="form-radio text-blue-600">
+                <span>1º Ano</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="2º" class="form-radio text-blue-600">
+                <span>2º Ano</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="ano" value="3º" class="form-radio text-blue-600">
+                <span>3º Ano</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-blue-700 font-semibold mb-2">Turma:</label>
+            <div class="grid grid-cols-3 gap-2">
+              {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+              <label class="flex items-center space-x-1">
+                <input type="radio" name="turma" value="{{ turma }}" required class="form-radio text-blue-600">
+                <span>{{ turma }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="relative my-8">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <span class="bg-white px-3 text-gray-500 font-medium">
+              <i class="fa-solid fa-video mr-1 text-blue-600"></i>Captura Facial
+            </span>
+          </div>
+        </div>
+
+        <div id="webcam-container" class="relative space-y-6">
+          <div id="loader"
+            class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-20 rounded-lg">
+            <div class="animate-pulse text-blue-600 flex items-center gap-2 text-lg font-semibold">
+              <i class="fa-solid fa-spinner fa-spin fa-lg"></i> Processando...
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="button" id="botao-webcam"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition transform hover:scale-105">
+              <i class="fa-solid fa-video"></i> Ligar Webcam
+            </button>
+          </div>
+
+          <div class="relative">
+            <video id="video" autoplay playsinline
+              class="rounded w-full hidden shadow-2xl border border-blue-500"></video>
+            <div id="filtro" class="absolute inset-0 pointer-events-none z-10 hidden">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-56 h-80 rounded-full border-4 border-dashed border-white bg-transparent z-10"></div>
+              </div>
+            </div>
+          </div>
+
+          <canvas id="canvas" class="hidden"></canvas>
+
+          <div class="flex justify-center">
+            <button type="submit" id="botao-captura"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300 transform hover:scale-105 flex items-center gap-2">
+              <i class="fa-solid fa-camera"></i> Iniciar Captura Facial
+            </button>
+          </div>
+
+          <div id="preview-container"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 [&>img]:shadow-md [&>img]:rounded-lg [&>img]:border [&>img]:border-blue-300">
+          </div>
+
+          <p id="status" class="text-center text-sm text-gray-500 mt-4 italic"></p>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 text-white text-center py-6 mt-auto">
+    &copy; <span id="anoAtual"></span> Sistema Escolar com Reconhecimento Facial
+    <div class="space-x-4 mt-2 text-sm">
+      <a href="#" class="hover:text-blue-400">Sobre</a>
+      <a href="#" class="hover:text-blue-400">Ajuda</a>
+      <a href="#" class="hover:text-blue-400">Privacidade</a>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/cadastrar_alunos.js') }}"></script>
+</body>
+
+</html>

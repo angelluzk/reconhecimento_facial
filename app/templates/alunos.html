@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block title %} Alunos | Admin{% endblock %}
+
+{% block content %}
+<div class="flex flex-col min-h-screen">
+    <main class="flex-1 w-full px-6">
+        <h2 class="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <i class="fas fa-users mr-4 text-3xl hover:text-blue-500"></i>Listagem de Alunos - Dados Cadastrados
+        </h2>
+
+        <div class="flex justify-end mt-5 mb-4">
+            <a href="{{ url_for('alunos.cadastro') }}"
+                class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+                <i class="fas fa-user-plus mr-2"></i> Cadastrar Novo Aluno
+            </a>
+        </div>
+
+        <form method="get" class="bg-white p-5 rounded-xl shadow-md space-y-5">
+            <div class="mb-4">
+                <label class="font-semibold block mb-1">Aluno:</label>
+                <div class="flex items-center border border-gray-300 rounded-md">
+                    <i class="fas fa-user px-3 text-gray-500"></i>
+                    <input type="text" name="nome" placeholder="Nome do aluno" value="{{ request.args.get('nome', '') }}"
+                        class="w-full border-none px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 ease-in-out" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="font-semibold block mb-1">Ano:</label>
+                    <div class="flex items-center border border-gray-300 rounded-md">
+                        <i class="fas fa-calendar-alt px-3 text-gray-500"></i>
+                        <select name="ano"
+                            class="w-full border-none px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 ease-in-out">
+                            <option value="" disabled selected>Selecione o ano...</option>
+                            <option value="1º" {% if request.args.get('ano')=='1º' %}selected{% endif %}>1º Ano</option>
+                            <option value="2º" {% if request.args.get('ano')=='2º' %}selected{% endif %}>2º Ano</option>
+                            <option value="3º" {% if request.args.get('ano')=='3º' %}selected{% endif %}>3º Ano</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-semibold block mb-1">Turma:</label>
+                    <div class="flex items-center border border-gray-300 rounded-md">
+                        <i class="fas fa-users px-3 text-gray-500"></i>
+                        <select name="turma"
+                            class="w-full border-none px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 ease-in-out">
+                            <option value="" disabled selected>Selecione a turma...</option>
+                            {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                            <option value="{{ turma }}" {% if request.args.get('turma')==turma %}selected{% endif %}>{{ turma }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center flex flex-wrap justify-center gap-4 pt-4">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+                    <i class="fas fa-search mr-2"></i>Filtrar
+                </button>
+
+                <a href="{{ url_for('alunos.alunos') }}"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-8 py-2 rounded-lg shadow transition ease-in-out duration-300 transform hover:scale-105">
+                    <i class="fas fa-eraser mr-2"></i>Limpar Filtros
+                </a>
+            </div>
+        </form>
+
+        <div class="overflow-x-auto mt-10">
+            <table class="min-w-full bg-white rounded-xl shadow">
+                <thead class="bg-blue-100 text-blue-800">
+                    <tr>
+                        <th class="py-3 px-4 text-left font-semibold">ID</th>
+                        <th class="py-3 px-4 text-left font-semibold">Nome do Aluno</th>
+                        <th class="py-3 px-4 text-left font-semibold">Turno</th>
+                        <th class="py-3 px-4 text-left font-semibold">Turma</th>
+                        <th class="py-3 px-4 text-left font-semibold">Foto</th>
+                        <th class="py-3 px-4 text-left font-semibold">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaAlunos" class="text-gray-700"></tbody>
+            </table>
+        </div>
+
+        <div id="pagination" class="mt-4 flex justify-center"></div>
+    </main>
+</div>
+
+<div id="modalAluno" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md transform transition-transform scale-100">
+        <h3 class="text-xl font-semibold mb-4" id="modalTitulo">Editar Dados do Aluno</h3>
+        <form id="formAluno">
+            <input type="hidden" id="alunoId" />
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Nome:</label>
+                <input type="text" id="alunoNome" class="w-full border rounded px-3 py-2" required />
+            </div>
+
+            <div id="campoTurno" class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Turno:</label>
+                <select id="alunoTurno" class="w-full border rounded px-3 py-2" disabled>
+                    <option value="manhã">Manhã</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="integral">Integral</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Ano:</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="ano" value="1º" required class="form-radio text-blue-600">
+                            <span>1º Ano</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="ano" value="2º" class="form-radio text-blue-600">
+                            <span>2º Ano</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="ano" value="3º" class="form-radio text-blue-600">
+                            <span>3º Ano</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Turma:</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        {% for turma in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="turma" value="{{ turma }}" class="form-radio text-blue-600">
+                            <span>{{ turma }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+                <button type="submit" id="btnSalvar"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow">
+                    Salvar
+                </button>
+                <button type="button" id="btnFechar"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg">
+                    Fechar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+    <div class="bg-green-500 text-white px-6 py-3 rounded shadow-lg opacity-0 transition-opacity duration-300 pointer-events-auto"
+        id="toastContent">
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/alunos.js') }}" defer></script>
+{% endblock %}

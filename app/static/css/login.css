@@ -1,0 +1,49 @@
+body {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2b6cb0;
+}
+
+body.dark {
+    background-color: #1a202c;
+}
+
+body.dark .bg-white {
+    background-color: #2d3748;
+}
+
+body.dark .text-gray-900 {
+    color: #f7fafc;
+}
+
+body.dark .text-gray-600 {
+    color: #e2e8f0;
+}
+
+body.dark .text-gray-700 {
+    color: #edf2f7;
+}
+
+body.dark .border-gray-600 {
+    border-color: #4a5568;
+}
+
+body.dark .bg-blue-600 {
+    background-color: #3182ce;
+}
+
+body.dark .bg-blue-700 {
+    background-color: #2b6cb0;
+}
